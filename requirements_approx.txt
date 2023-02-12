@@ -1,0 +1,6 @@
+evdev
+
+pi-plates
+spidev
+RPi.GPIO (or python3-rpi.gpio in apt)
+pyyaml
