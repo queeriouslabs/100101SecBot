@@ -1,0 +1,47 @@
+# Specs for a device
+- unix sockets for IPC
+- zeromq for inter-device communication
+- processes over asyncio / threads
+- asyncio over threads
+- always starts at least one process/task/tread
+- encrypted inter-device commuinication
+- encrypted disks - but how to boot?  maybe not.
+
+# ACL
+- nice file format for mapping identifier to bounded permissions
+    - encrypt on-disk, push to somewhere else
+- hash identifier to use with hooks
+- cache in memory
+- updater which updates restarts services when updated
+    - stores on disk / sync disk and cache
+- logging
+
+- Response from ACL
+    {
+        [
+            perm: "/path/to/device/component/[crud]",
+            grant: True/False,
+            context: {'k':'v',}
+        ]
+    }
+    - notify other devices (e.g. WWE entrances)?
+
+- Request to ACL:
+    ID, permission request(s), 
+- json request format
+    {
+        tgt_dev_id: target device
+        src_dev_id: device uuid making request
+        requestor_id: permission requested for this id
+        permissions: {} dict of permissions requested
+    }
+
+- permission spec
+    {
+        perm: "/path/to/device/component/[c|r|u|d]",
+        context: 
+            {
+                "key": "value", # any extra information required to compute constraints
+            }
+    }
+

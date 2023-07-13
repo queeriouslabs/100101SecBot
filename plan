@@ -1,0 +1,66 @@
+
+       -----------------------------         [ Permission Request ]
+scan -> [in_q]  rfid reader  [out_q] >---- /run/queeriouslabs/auth.sock
+       -----------------------------
+
+                                     --------------------------------
+                                 --> [in_q]  authenticator  [out_q] >-----+
+                                /    --------------------------------     |         [ Authenticated request ]
+/run/queeriouslabs/auth.sock --<                                          +------/run/queeriouslabs/latch.sock
+                                \                                         | 
+                                 <----------------------------------------+
+
+
+in_q  :  one
+out_q :  many
+
+
+Authenticator is the only real server, others are clients
+Actions can only be performed by the authenticator
+
+transport layers:
+    - devices (e.g. event system, uarts, i2c WHATEVER)
+    - unix domain sockets
+    - networking (zeromq)
+
+rfid_reader is implicitly requesting the /latch/open action
+    - a successful scan generates the request
+    - unsuccessful scan doesn't do anything
+
+autheticator decides if that's allowed
+    - yes: forwards request to /latch/open
+    - no: rejection
+
+
+task/server to read input -->  place into in_q
+task to read in_q         -->  triggers device.input(msg)
+device puts in out_q      -->  task to send
+
+
+if server:
+    - put client into a dict w/ label
+    - grab client from dict w/ label to send
+
+out_q should be (client, msg) pair -> clients[<client_id>] = client
+in_q should be (client, msg) pair  -> client = clients[<client_id>]
+
+
+input task:
+    - opens listening connections
+    - Manages input transport, connections, etc and puts messages into in_q
+    - Adds clients to client dict
+
+output task:
+    - removes (client, msg) pairs from out_q and sends via clienet's transport
+    - closes connections
+    - removes clients from client dict
+
+
+input:
+    - binding address
+    - client callback
+
+connection types:
+- unix sockets (server, client)
+- tcp socekts (server, client)
+- event system (reader, writer)
