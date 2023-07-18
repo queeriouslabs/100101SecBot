@@ -6,6 +6,10 @@ from jsonschema import ValidationError
 import logging
 from logging.handlers import TimedRotatingFileHandler
 import os
+from signal import (
+    SIGTERM,
+    SIGINT,
+)
 import time
 
 from settings import (
@@ -22,17 +26,17 @@ class App:
 
     def __init__(self, name):
         self.name = name
-        self.config = None
-        self.logger = logging.getLogger(__name__)
-        self.tasks = {}
         self.callback = None
+        self.config = None
+        self.connections = {}
+        self.logger = logging.getLogger(__name__)
         self.server = None
         self.server_task = None
         self.socket_root = "."
         self.in_q = asyncio.Queue()
         self.out_q = asyncio.Queue()
         self.set_callback()
-        self.connections = {}
+        self.tasks = {}
 
     def start(self):
         self.server = asyncio.start_unix_server(
@@ -41,23 +45,28 @@ class App:
         )
         self.tasks['receiver'] = asyncio.create_task(self.server)
         self.tasks['responder'] = asyncio.create_task(self.response())
+        loop = asyncio.get_event_loop()
+        loop.add_signal_handler(SIGTERM, self.cleanup)
+        loop.add_signal_handler(SIGINT, self.cleanup)
 
     def stop(self):
+        #TODO: What to do about tasks
         if self.server:
             self.server.close()
 
-    async def response(self):
-        while True:
-            data = await self.out_q.get()
+        sock_path = f"{self.name}.sock"
+        if sock_path in os.listdir(self.socket_root):
+            os.unlink(f"{self.socket_root}/{sock_path}")
 
-            validate_response(data)
+        for task in self.tasks:
+            self.logger.info(f"Cancelling {task}")
+            self.tasks[task].cancel()
 
-            client_id = data['target_id']
-            msg = json.dumps(data).encode('utf-8')
-            if client_id in self.connections:
-                _, client = self.connections[client_id]
-                client.write(msg + b'\n')
-                await client.drain()
+    def cleanup(self):
+        self.logger.warn("Cleaning up")
+        self.stop()
+        self.logger.warn("Exiting")
+        exit()
 
     def set_callback(self):
         """ Constructs the client callback for asyncio server, closed over
@@ -66,19 +75,23 @@ class App:
         async def client_callback(reader, writer):
             while True:
                 req = await reader.readline()
+                if reader.at_eof():
+                    break
+                if (req == b''):
+                    continue
                 try:
                     req = json.loads(req.decode('utf-8'))
-                except (AttributeError, JSONDecodeError):
+                except (AttributeError, JSONDecodeError) as e:
                     writer.close()
                     await writer.wait_closed()
-                    return
+                    raise e
 
                 try:
                     validate_request(req)
-                except ValidationError:
+                except ValidationError as e:
                     writer.close()
                     await writer.wait_closed()
-                    return
+                    raise e
 
                 if(src_id := req.get('source_id')):
                     self.connections[src_id] = (reader, writer)
@@ -108,6 +121,20 @@ class App:
             server.write(msg + b'\n')
             await server.drain()
 
+    async def response(self):
+        # Always goes back to the source
+        while True:
+            data = await self.out_q.get()
+
+            validate_response(data)
+
+            client_id = data['source_id']
+            msg = json.dumps(data).encode('utf-8')
+            if client_id in self.connections:
+                _, client = self.connections[client_id]
+                client.write(msg + b'\n')
+                await client.drain()
+
 
 def config_logging(app, app_config):
     handler = TimedRotatingFileHandler(
@@ -125,6 +152,7 @@ def config_logging(app, app_config):
     handler.setFormatter(formatter)
     app.logger.addHandler(handler)
     app.logger.setLevel(app_config.LOG_LEVEL)
+    app.logger.info("Logging enabled")
 
 
 def create_app(name):
@@ -138,6 +166,5 @@ def create_app(name):
 
     app.config = app_config
     config_logging(app, app_config)
-    app.logger.info("Logging enabled")
     app.logger.info("App initialized")
     return app
