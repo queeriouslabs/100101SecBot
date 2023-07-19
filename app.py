@@ -111,15 +111,32 @@ class App:
             writer.close()
             await writer.wait_closed()
 
-    async def request(self, req):
-        validate_request(req)
+    async def request(self, addr, req):
+        ''' A one-off request to a server.  Expects a response.'''
 
+        validate_request(req)
         target = req['target_id']
-        if target in self.connections:
-            _, server = self.connections.get(target)
-            msg = json.dumps(req).encode('utf-8')
-            server.write(msg + b'\n')
-            await server.drain()
+        if target != addr:
+            raise ValueError(f"addr: {addr} and target: {target} mismatched")
+
+        sock_path = f"{self.socket_root}/{addr}.sock"
+        reader, writer = await asyncio.open_unix_connection(sock_path)
+
+        msg = json.dumps(req).encode('utf-8')
+        writer.write(msg + b'\n')
+        await writer.drain()
+
+        data = await reader.readline()
+        writer.close()
+        await writer.wait_closed()
+
+        try:
+            data = json.loads(data)
+        except JSONDecodeError as e:
+            self.logger(f"{e}")
+
+        validate_response(json.loads(data))
+        return data
 
     async def response(self):
         # Always goes back to the source
