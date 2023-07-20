@@ -78,7 +78,7 @@ async def test_async_for():
 @patch("rfid_reader.RfidReader.find_ev_device")
 async def test_get_reader(find_ev_device):
     name = "front_door_rfid"
-    test_string = "abcdefghijklmnopqrstuvwxyz1234567890".upper()
+    test_string = "1234567890"
 
     mevdev = MockEvDevice()
     mevdev.stuff = string_to_ecode_list(test_string, True)
@@ -94,6 +94,43 @@ async def test_get_reader(find_ev_device):
 
     asyncio.create_task(rfid.process())
     await asyncio.sleep(1)
+    rfid.app.request.assert_called()
+    rfid.app.request.assert_awaited()
+    rfid.app.request.assert_called_with("auth", expected_req)
+
+
+@pytest.mark.asyncio
+@patch("rfid_reader.RfidReader.find_ev_device")
+async def test_missing_dev(find_ev_device):
+    name = "front_door_rfid"
+    rfid = RfidReader(name, "Barcode Reader ")
+
+    rfid.dev = None
+
+    with pytest.raises(ValueError):
+        await rfid.process()
+
+
+@pytest.mark.asyncio
+@patch("rfid_reader.RfidReader.find_ev_device")
+async def test_bad_key(find_ev_device):
+    name = "test_name"
+    test_ident = "012345A6789"
+    expected_ident = "0123456789"
+    expected_req = make_request(name, expected_ident)
+
+    mevdev = MockEvDevice()
+    mevdev.stuff = string_to_ecode_list(test_ident, True)
+    find_ev_device.return_value = mevdev
+
+    rfid = RfidReader(name, "Barcode Reader ")
+    rfid.app.request = AsyncMock()
+
+    assert rfid.dev == mevdev
+
+    asyncio.create_task(rfid.process())
+    await asyncio.sleep(1)
+
     rfid.app.request.assert_called()
     rfid.app.request.assert_awaited()
     rfid.app.request.assert_called_with("auth", expected_req)
