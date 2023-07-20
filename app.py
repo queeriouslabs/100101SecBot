@@ -135,7 +135,7 @@ class App:
         except JSONDecodeError as e:
             self.logger(f"{e}")
 
-        validate_response(json.loads(data))
+        validate_response(data)
         return data
 
     async def response(self):
@@ -183,5 +183,5 @@ def create_app(name):
 
     app.config = app_config
     config_logging(app, app_config)
-    app.logger.info("App initialized")
+    app.logger.info(f"App {name} initialized")
     return app
