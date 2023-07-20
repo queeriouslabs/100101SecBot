@@ -56,11 +56,11 @@ class RfidReader:
                 self.app.logger.info(
                     f"Appending keycode: {c.keycode}, {c.keycode[4:]}")
                 try:
-                    keys.append(c.keycode[4:])
+                    keys.append(int(c.keycode[4:]))
                 except ValueError as e:
                     pass
             else:
-                identifier = "".join(keys)
+                identifier = "".join(map(str, keys))
                 try:
                     # ignores response
                     await self.app.request("auth",
