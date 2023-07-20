@@ -1,7 +1,7 @@
+pi-plates
+spidev
+RPi.GPIO
 evdev
-# pi-plates
-# spidev
-# RPi.GPIO
 pyyaml
 jsonschema
 referencing
@@ -9,3 +9,4 @@ coverage
 pytest
 pytest-cov
 pytest-pudb
+pytest-asyncio
