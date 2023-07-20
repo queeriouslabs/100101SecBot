@@ -1,14 +1,14 @@
 import asyncio
 import evdev
-import datetime
-import time
 from app import create_app
 from schema import validate_request
 
 
-def make_request(identifier):
+def make_request(source_id, identifier):
+    ''' Creates a open permission request targetting the front_door_latch
+        adding the identifier to the permission's context '''
     req = {
-        "source_id": "rfid_reader",
+        "source_id": source_id,
         "target_id": "front_door_latch",
         "permissions": [{
             "perm": "/open",
@@ -17,41 +17,60 @@ def make_request(identifier):
     return req
 
 
-async def process():
-    app = create_app("rfid_reader")
+class RfidReader:
 
-    # TODO: How do i get addresses
-    await app.connect("auth")
+    def __init__(self, name, dev_name):
+        self.name = name
+        self.app = create_app(name)
+        self.dev = self.find_ev_device(dev_name)
 
-    rfid_reader_name = "Barcode Reader "
-    devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
-    rfid_reader = [d for d in devices if d.name == rfid_reader_name][0]
+    def find_ev_device(self, label):
+        ''' Returns an evdev.InputDevice, if found, with name==label.'''
+        devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
+        try:
+            rfid_reader = [d for d in devices if d.name == label][0]
+        except IndexError:
+            self.app.logger.error(f"No RFID reader: {label}")
+            exit()
+        if rfid_reader:
+            self.app.logger.info(f"Found {label}")
 
-    if rfid_reader:
-        app.logger.info(f"Found {rfid_reader_name}")
+        for d in devices:
+            if d != label:
+                d.close()
 
-    for d in devices:
-        if d != rfid_reader:
-            d.close()
+        return rfid_reader
 
-    keys = []
+    async def process(self):
+        keys = []
 
-    async for ev in rfid_reader.async_read_loop():
-        if ev.type != evdev.ecodes.EV_KEY:
-            continue
+        if not self.dev:
+            raise ValueError(f"Missing device for {self.name}")
 
-        c = evdev.categorize(ev)
+        async for ev in self.dev.async_read_loop():
+            if ev.type != evdev.ecodes.EV_KEY or ev.value != 0:
+                continue
 
-        if c.keystate != 0:
-            continue
+            if ev.code != evdev.ecodes.KEY_ENTER:
+                c = evdev.categorize(ev)
+                self.app.logger.info(
+                    f"Appending keycode: {c.keycode}, {c.keycode[4:]}")
+                try:
+                    keys.append(c.keycode[4:])
+                except ValueError as e:
+                    pass
+            else:
+                identifier = "".join(keys)
+                try:
+                    # ignores response
+                    await self.app.request("auth",
+                                           make_request(self.name, identifier))
+                except ValueError as e:
+                    self.app.logger.error(f"Auth request failed with {e}")
+                keys = []
 
-        if ev.code == evdev.ecodes.KEY_ENTER:
-            await app.request(make_request("".join(map(str, keys))))
-            # yield "".join(map(str, keys))
-            keys = []
-        else:
-            app.logging.info(f"Appending keycode: {c.keycode}, {c.keycode[4:]}")
-            try:
-                keys.append(int(c.keycode[4:]))
-            except ValueError:
-                pass
+
+if __name__ == "__main__":
+    front_door_reader = RfidReader("front_door_rfid", "Barcode Reader ")
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(front_door_reader.process())
