@@ -31,7 +31,6 @@ class App:
         self.connections = {}
         self.logger = logging.getLogger(__name__)
         self.server = None
-        self.server_task = None
         self.socket_root = "."
         self.in_q = asyncio.Queue()
         self.out_q = asyncio.Queue()
@@ -50,7 +49,6 @@ class App:
         loop.add_signal_handler(SIGINT, self.cleanup)
 
     def stop(self):
-        #TODO: What to do about tasks
         if self.server:
             self.server.close()
 
@@ -58,14 +56,16 @@ class App:
         if sock_path in os.listdir(self.socket_root):
             os.unlink(f"{self.socket_root}/{sock_path}")
 
-        for task in self.tasks:
+        task_names = list(self.tasks.keys())
+        while self.tasks:
+            task = self.tasks.pop(task_names.pop())
             self.logger.info(f"Cancelling {task}")
-            self.tasks[task].cancel()
+            task.cancel()
 
     def cleanup(self):
-        self.logger.warn("Cleaning up")
+        self.logger.warning("Cleaning up")
         self.stop()
-        self.logger.warn("Exiting")
+        self.logger.warning("Exiting")
         exit()
 
     def set_callback(self):
