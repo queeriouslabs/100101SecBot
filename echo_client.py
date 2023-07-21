@@ -1,13 +1,13 @@
 import asyncio
 import json
-from app import create_app
+from comms import create_comms
 
 
 async def test_echo():
     name = "echo_client"
-    app = create_app(name)
-    # await app.connect("echo")
-    # reader, _ = app.connections['echo']
+    comms = create_comms(name)
+    # await comms.connect("echo")
+    # reader, _ = comms.connections['echo']
 
     for x in range(0, 100):
         req = {
@@ -18,7 +18,7 @@ async def test_echo():
                     "perm": "/open/the/door",
                     "context": {"number": x}
                 }]}
-        print(await app.request("echo", req))
+        print(await comms.request("echo", req))
 
 
 if __name__ == "__main__":

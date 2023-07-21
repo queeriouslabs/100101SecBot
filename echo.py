@@ -1,25 +1,25 @@
 import asyncio
 import json
-from app import create_app
+from comms import create_comms
 
 
 async def process():
 
-    app = create_app("echo")
-    app.start()
+    comms = create_comms("echo")
+    comms.start()
 
     while True:
-        data = await app.in_q.get()
+        data = await comms.in_q.get()
         client = data['source_id']
 
-        app.logger.info(f"got {data} from {client}")
+        comms.logger.info(f"got {data} from {client}")
 
         permissions = data.pop('permissions')
         for perm in permissions:
             resp = data.copy()
             resp['perm'] = perm
             resp['grant'] = True
-            await app.out_q.put(resp)
+            await comms.out_q.put(resp)
 
 
 if __name__ == "__main__":

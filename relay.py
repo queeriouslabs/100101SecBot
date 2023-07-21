@@ -1,14 +1,14 @@
 import asyncio
 import time
 import piplates.RELAYplate as RELAY
-from app import create_app
+from comms import create_comms
 
 
 class Latch:
 
     def __init__(self, name):
-        self.app = create_app(name)
-        self.app.logger.info(f"Starting {name}")
+        self.comms = create_comms(name)
+        self.comms.logger.info(f"Starting {name}")
         self.failed = asyncio.Event()
         self.open = asyncio.Event()
         self.cool = asyncio.Event()
@@ -26,7 +26,7 @@ class Latch:
         ''' handles opening the actual relay via piplates.  Sets the
         latch status to 'hot' by clearing the cool event.
         '''
-        self.app.logger.info("Unlocking Front Door")
+        self.comms.logger.info("Unlocking Front Door")
         RELAY.relayON(0, 2)
         self.cool.clear()  # relay is hot
         self.open.set()    # latch is open
@@ -34,7 +34,7 @@ class Latch:
     def relay_off(self):
         ''' closes the relay, clearing the open event, and creating the
         cooldown task '''
-        self.app.logger.info("Locking Front Door")
+        self.comms.logger.info("Locking Front Door")
         RELAY.relayOFF(0, 2)
         self.open.clear()                     # latch is closed
         asyncio.create_task(self.cooldown())  # enter cooldown
@@ -53,11 +53,11 @@ class Latch:
                 self.relay_on()
                 break
             except AssertionError:
-                self.app.logger.warning("Relay is missing")
+                self.comms.logger.warning("Relay is missing")
                 await asyncio.sleep(0.2)
 
             if (time.time() - cooldown_marker > 1):
-                self.app.logger.error("Relay not opened after 1s, quitting")
+                self.comms.logger.error("Relay not opened after 1s, quitting")
                 self.failed.set()
                 return
 
@@ -71,7 +71,7 @@ class Latch:
         correct permissions.
         '''
         while not self.failed.is_set():
-            req = await self.app.in_q.get()
+            req = await self.comms.in_q.get()
 
             # don't need to process a request if it's already opened
             if self.open.is_set():
@@ -91,7 +91,7 @@ class Latch:
 
 if __name__ == "__main__":
     front_door = Latch("front_door")
-    front_door.app.start()
+    front_door.comms.start()
     loop = asyncio.get_event_loop()
     loop.run_until_complete(front_door.process())
     RELAY.relayOFF(0, 2) # uhh...just in case an error occurred

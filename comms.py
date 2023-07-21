@@ -1,3 +1,15 @@
+"""
+Communication can be split between Inter-Process Communication (IPC) which
+communicates between processes on the same device, and IP networking, aka
+Internet Protocol, which would be between devices.
+
+When executing on a unix-lixe device, IPC is manged via unix domain sockets.
+
+Python's asyncio manages both with similar approaches but separate function
+calls.
+
+Abstracting out the commuication allows easy replacement as needed.
+"""
 import asyncio
 import datetime
 import json
@@ -22,7 +34,7 @@ from schema import (
 )
 
 
-class App:
+class Comms:
 
     def __init__(self, name):
         self.name = name
@@ -70,7 +82,7 @@ class App:
 
     def set_callback(self):
         """ Constructs the client callback for asyncio server, closed over
-        'self' so the app's members are accessible in the callback. """
+        'self' so the class' members are accessible in the callback. """
 
         async def client_callback(reader, writer):
             while True:
@@ -153,9 +165,9 @@ class App:
                 await client.drain()
 
 
-def config_logging(app, app_config):
+def config_logging(comms, comms_config):
     handler = TimedRotatingFileHandler(
-        filename=app_config.LOG_FILE,
+        filename=comms_config.LOG_FILE,
         when="W6",
         interval=1,
         backupCount=52,
@@ -164,24 +176,24 @@ def config_logging(app, app_config):
         utc=True,
         atTime=None)
 
-    formatter = logging.Formatter(app_config.LOG_FORMAT)
-    handler.setLevel(app_config.LOG_LEVEL)
+    formatter = logging.Formatter(comms_config.LOG_FORMAT)
+    handler.setLevel(comms_config.LOG_LEVEL)
     handler.setFormatter(formatter)
-    app.logger.addHandler(handler)
-    app.logger.setLevel(app_config.LOG_LEVEL)
-    app.logger.info("Logging enabled")
+    comms.logger.addHandler(handler)
+    comms.logger.setLevel(comms_config.LOG_LEVEL)
+    comms.logger.info("Logging enabled")
 
 
-def create_app(name):
-    app = App(name)
+def create_comms(name):
+    comms = Comms(name)
     # I don't like this.   Inherent from some flask stuff.
     # make a loader/executor which just configs the thing, or something.
     if os.environ.get('QUEERIOUSLABS_ENV') == 'PROD':
-        app_config = ProdConfig()
+        comms_config = ProdConfig()
     else:
-        app_config = Config()
+        comms_config = Config()
 
-    app.config = app_config
-    config_logging(app, app_config)
-    app.logger.info(f"App {name} initialized")
-    return app
+    comms.config = comms_config
+    config_logging(comms, comms_config)
+    comms.logger.info(f"App {name} initialized")
+    return comms

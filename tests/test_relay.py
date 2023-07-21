@@ -32,7 +32,7 @@ async def test_init(relayOFF, relayON):
     assert relayOFF.called
 
     task.cancel()
-    front_door.app.logger.handlers.clear()
+    front_door.comms.logger.handlers.clear()
 
 
 @pytest.mark.asyncio
@@ -49,13 +49,13 @@ async def test_open(relayOFF, relayON):
             'grant': True,
             'perm': '/front_door/open'}, ]}
 
-    await front_door.app.in_q.put(open_req)
+    await front_door.comms.in_q.put(open_req)
     await front_door.open.wait()
     assert not front_door.cool.is_set()
     await front_door.cool.wait()
     assert not front_door.open.is_set()
     task.cancel()
-    front_door.app.logger.handlers.clear()
+    front_door.comms.logger.handlers.clear()
 
 
 @pytest.mark.asyncio
@@ -74,13 +74,13 @@ async def test_open_already_open(unlock_coro, relayOFF, relayON):
 
     # set relay as open
     front_door.open.set()
-    await front_door.app.in_q.put(open_req)
+    await front_door.comms.in_q.put(open_req)
     await asyncio.sleep(2)
 
     assert not unlock_coro.called
 
     task.cancel()
-    front_door.app.logger.handlers.clear()
+    front_door.comms.logger.handlers.clear()
 
 
 @pytest.mark.asyncio
@@ -98,12 +98,12 @@ async def test_relay_failure(relayOFF, relayON):
             'grant': True,
             'perm': '/front_door/open'}, ]}
 
-    await front_door.app.in_q.put(open_req)
+    await front_door.comms.in_q.put(open_req)
     await front_door.failed.wait()
     assert front_door.failed.is_set()
 
     task.cancel()
-    front_door.app.logger.handlers.clear()
+    front_door.comms.logger.handlers.clear()
 
 
 @pytest.mark.asyncio
@@ -123,7 +123,7 @@ async def test_relay_hot(relayOFF, relayON):
     front_door.cool.clear()
     await asyncio.sleep(.25)
     assert not front_door.cool.is_set()
-    await front_door.app.in_q.put(open_req)
+    await front_door.comms.in_q.put(open_req)
 
     await asyncio.sleep(.25)
     assert not front_door.cool.is_set()
@@ -133,4 +133,4 @@ async def test_relay_hot(relayOFF, relayON):
     assert relayON.called
 
     task.cancel()
-    front_door.app.logger.handlers.clear()
+    front_door.comms.logger.handlers.clear()

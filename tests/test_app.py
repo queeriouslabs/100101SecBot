@@ -3,15 +3,15 @@ import asyncio
 import os
 from unittest.mock import patch
 import pytest
-from app import create_app
+from comms import create_comms
 import schema
 
 
 @pytest.mark.asyncio
-async def test_app_init():
+async def test_comms_init():
 
     test_server_name = "test_server_name"
-    server = create_app(test_server_name)
+    server = create_comms(test_server_name)
     assert server.name == test_server_name
     assert server.socket_root == "."
     assert server.callback
@@ -37,12 +37,12 @@ async def test_app_init():
 @pytest.mark.asyncio
 async def test_client_server_connections():
     test_server_name = "test_server_name"
-    server = create_app(test_server_name)
+    server = create_comms(test_server_name)
     server.start()
     await asyncio.sleep(0)
 
     test_client_name = "test_client_name"
-    client = create_app(test_client_name)
+    client = create_comms(test_client_name)
 
     await client.connect(test_server_name)
     assert test_server_name in client.connections
@@ -56,8 +56,8 @@ async def test_client_server_connections():
 @pytest.mark.asyncio
 async def test_client_server_communication():
 
-    async def process(app):
-        data = await app.in_q.get()
+    async def process(comms):
+        data = await comms.in_q.get()
         client = data['source_id']
 
         permissions = data.pop('permissions')
@@ -65,16 +65,16 @@ async def test_client_server_communication():
             resp = data.copy()
             resp['perm'] = perm
             resp['grant'] = True
-            await app.out_q.put(resp)
+            await comms.out_q.put(resp)
 
     test_server_name = "test_server_name"
-    server = create_app(test_server_name)
+    server = create_comms(test_server_name)
     server.start()
     await asyncio.sleep(0)
     asyncio.create_task(process(server))
 
     test_client_name = "test_client_name"
-    client = create_app(test_client_name)
+    client = create_comms(test_client_name)
 
     perm = "/what/a/permission"
     perm_context = { "key": "value" }

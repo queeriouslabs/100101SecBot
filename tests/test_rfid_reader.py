@@ -86,7 +86,7 @@ async def test_get_reader(find_ev_device):
     find_ev_device.return_value = mevdev
 
     rfid = RfidReader(name, "Barcode Reader ")
-    rfid.app.request = AsyncMock()
+    rfid.comms.request = AsyncMock()
 
     assert rfid.dev == mevdev
 
@@ -94,9 +94,9 @@ async def test_get_reader(find_ev_device):
 
     asyncio.create_task(rfid.process())
     await asyncio.sleep(1)
-    rfid.app.request.assert_called()
-    rfid.app.request.assert_awaited()
-    rfid.app.request.assert_called_with("auth", expected_req)
+    rfid.comms.request.assert_called()
+    rfid.comms.request.assert_awaited()
+    rfid.comms.request.assert_called_with("authenticator", expected_req)
 
 
 @pytest.mark.asyncio
@@ -124,13 +124,13 @@ async def test_bad_key(find_ev_device):
     find_ev_device.return_value = mevdev
 
     rfid = RfidReader(name, "Barcode Reader ")
-    rfid.app.request = AsyncMock()
+    rfid.comms.request = AsyncMock()
 
     assert rfid.dev == mevdev
 
     asyncio.create_task(rfid.process())
     await asyncio.sleep(1)
 
-    rfid.app.request.assert_called()
-    rfid.app.request.assert_awaited()
-    rfid.app.request.assert_called_with("auth", expected_req)
+    rfid.comms.request.assert_called()
+    rfid.comms.request.assert_awaited()
+    rfid.comms.request.assert_called_with("authenticator", expected_req)

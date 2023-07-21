@@ -1,6 +1,6 @@
 import asyncio
 import evdev
-from app import create_app
+from comms import create_comms
 from schema import validate_request
 
 
@@ -21,7 +21,7 @@ class RfidReader:
 
     def __init__(self, name, dev_name):
         self.name = name
-        self.app = create_app(name)
+        self.comms = create_comms(name)
         self.dev = self.find_ev_device(dev_name)
 
     def find_ev_device(self, label):
@@ -30,10 +30,10 @@ class RfidReader:
         try:
             rfid_reader = [d for d in devices if d.name == label][0]
         except IndexError:
-            self.app.logger.error(f"No RFID reader: {label}")
+            self.comms.logger.error(f"No RFID reader: {label}")
             exit()
         if rfid_reader:
-            self.app.logger.info(f"Found {label}")
+            self.comms.logger.info(f"Found {label}")
 
         for d in devices:
             if d != label:
@@ -53,7 +53,7 @@ class RfidReader:
 
             if ev.code != evdev.ecodes.KEY_ENTER:
                 c = evdev.categorize(ev)
-                self.app.logger.info(
+                self.comms.logger.info(
                     f"Appending keycode: {c.keycode}, {c.keycode[4:]}")
                 try:
                     keys.append(int(c.keycode[4:]))
@@ -63,10 +63,10 @@ class RfidReader:
                 identifier = "".join(map(str, keys))
                 try:
                     # ignores response
-                    await self.app.request("auth",
+                    await self.comms.request("authenticator",
                                            make_request(self.name, identifier))
                 except ValueError as e:
-                    self.app.logger.error(f"Auth request failed with {e}")
+                    self.comms.logger.error(f"Auth request failed with {e}")
                 keys = []
 
 
