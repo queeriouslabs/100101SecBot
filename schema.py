@@ -1,3 +1,13 @@
+"""
+Schema used in message passing between components and validators used
+by the comms module (and others) for asserting the structural correctness of
+the messaging.
+
+These schema are not the protocol used by the comms module, all messages
+passed in that protocol are validated by these schema.
+
+See the documentation for jsonschema to understand the syntax.
+"""
 from jsonschema import validate
 
 
@@ -22,7 +32,6 @@ request_schema = {
         "target_id": {"type": "string"},
         "permissions": {
             "type": "array",
-            # "items": { "$ref": "/schemas/permission" },
             "items": permission_schema,
             "minContains": 1,
         }
