@@ -1,10 +1,39 @@
+""" This Relay componenent is implemneted with a piplates Relay Plate:
+    https://pi-plates.com/relayr1/
+
+The openness of the door is not tracked.  What is tracked is if the relay is
+on or off.
+
+When the relay is ON the door is UNLOCKED.
+
+The door is held UNLOCKED for 3s to allow a human to open it.
+The lock is engaged after 3s.  The door can still close while locked.
+After the relay is turned off, it is held in a un-usable state for 3s.  This
+let's the relay cooldown.
+
+Thus the minimal cycle for unlocking is 6s.
+
+If the relay is ON and a request comes in to turn the relay ON, the request
+is ignored.
+
+Worst case behavior is a request can be made again.  At human scale, the
+order of seconds is fine as it requires physical motion.
+
+If the RelayPlate cannot communicate with the driver, the relay enters a
+failed state.
+
+The states of Open, Close, and Failed are managed via asyncio Events which
+may be awaited, checked, or toggled via coroutines.
+
+On initialization the relay is closed.
+"""
 import asyncio
 import time
 import piplates.RELAYplate as RELAY
 from comms import create_comms
 
 
-class Latch:
+class Relay:
 
     def __init__(self, name):
         self.comms = create_comms(name)
@@ -90,7 +119,7 @@ class Latch:
 
 
 if __name__ == "__main__":
-    front_door = Latch("front_door")
+    front_door = Relay("front_door")
     front_door.comms.start()
     loop = asyncio.get_event_loop()
     loop.run_until_complete(front_door.process())

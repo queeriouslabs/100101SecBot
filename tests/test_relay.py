@@ -22,7 +22,7 @@ async def test_init(relayOFF, relayON):
     Mocking relayON and relayOFF is required in a testing env to control the
     non-existent piplate.RELAYplate
     '''
-    front_door = relay.Latch("front_door")
+    front_door = relay.Relay("front_door")
     task = asyncio.create_task(front_door.process())
 
     await asyncio.sleep(0)
@@ -39,7 +39,7 @@ async def test_init(relayOFF, relayON):
 @patch("relay.RELAY.relayON")
 @patch("relay.RELAY.relayOFF")
 async def test_open(relayOFF, relayON):
-    front_door = relay.Latch("front_door")
+    front_door = relay.Relay("front_door")
     task = asyncio.create_task(front_door.process())
 
     await asyncio.sleep(0)
@@ -61,9 +61,9 @@ async def test_open(relayOFF, relayON):
 @pytest.mark.asyncio
 @patch("relay.RELAY.relayON")
 @patch("relay.RELAY.relayOFF")
-@patch("relay.Latch.unlock")
+@patch("relay.Relay.unlock")
 async def test_open_already_open(unlock_coro, relayOFF, relayON):
-    front_door = relay.Latch("front_door")
+    front_door = relay.Relay("front_door")
     task = asyncio.create_task(front_door.process())
     await asyncio.sleep(0)
 
@@ -87,7 +87,7 @@ async def test_open_already_open(unlock_coro, relayOFF, relayON):
 @patch("relay.RELAY.relayON")
 @patch("relay.RELAY.relayOFF")
 async def test_relay_failure(relayOFF, relayON):
-    front_door = relay.Latch("front_door")
+    front_door = relay.Relay("front_door")
     task = asyncio.create_task(front_door.process())
     await asyncio.sleep(0)
 
@@ -110,7 +110,7 @@ async def test_relay_failure(relayOFF, relayON):
 @patch("relay.RELAY.relayON")
 @patch("relay.RELAY.relayOFF")
 async def test_relay_hot(relayOFF, relayON):
-    front_door = relay.Latch("front_door")
+    front_door = relay.Relay("front_door")
     task = asyncio.create_task(front_door.process())
     await asyncio.sleep(0)
 

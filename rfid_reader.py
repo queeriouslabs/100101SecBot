@@ -1,12 +1,27 @@
+""" This implemenetation of an RFID Reader expects a keyboard-like device
+which registers with linux's event sub-system.
+
+`evdev` does all the heavy lifting of interacting with the device and emits
+individual InputEvents for analysis, which represent keyboard key interactions.
+
+"down" presses are ignored in favor of readering "up" events (e.g. key-release)
+and the return key represents the end of an string of input.
+
+That string of input is treated as an identifier, and this component
+interprets this identifier as a request to open the front door.
+
+The main loop waits for input from the event subsystem and analyzes each event
+to fit the input criteria, storing key values until return is detected.
+"""
 import asyncio
 import evdev
 from comms import create_comms
-from schema import validate_request
 
 
 def make_request(source_id, identifier):
-    ''' Creates a open permission request targetting the front_door_latch
-        adding the identifier to the permission's context '''
+    """ Helper function to creates permission request targetting the
+    front_door_latch, adding the identifier to the permission's context
+    """
     req = {
         "source_id": source_id,
         "target_id": "front_door_latch",
@@ -25,7 +40,11 @@ class RfidReader:
         self.dev = self.find_ev_device(dev_name)
 
     def find_ev_device(self, label):
-        ''' Returns an evdev.InputDevice, if found, with name==label.'''
+        """ Queries devices for one with the name `label` and returns an
+        evdev.InputDevice, if found.
+
+        If no device is found with such a name, exit the interpretter.
+        """
         devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
         try:
             rfid_reader = [d for d in devices if d.name == label][0]
@@ -42,6 +61,18 @@ class RfidReader:
         return rfid_reader
 
     async def process(self):
+        """ Main loop for this component.  Waits on events from the event
+        device and checks if they are Key Presses.  If they are, it will
+        filter out Key Down (press) in favor of Key Up (release).  The
+        value of the keys are derived from the key codes (e.g. KEY_5).
+
+        non-integers are filtered out except for Return, which represents
+        the end of an input string.
+
+        When enter is found, the string is assemled and sent to the
+        `authenticator` component with a permission request to open the front
+        door.
+        """
         keys = []
 
         if not self.dev:
