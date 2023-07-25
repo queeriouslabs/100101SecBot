@@ -96,7 +96,7 @@ async def test_get_reader(find_ev_device):
     await asyncio.sleep(1)
     rfid.comms.request.assert_called()
     rfid.comms.request.assert_awaited()
-    rfid.comms.request.assert_called_with("authenticator", expected_req)
+    rfid.comms.request.assert_called_with("authorizer", expected_req)
 
 
 @pytest.mark.asyncio
@@ -133,4 +133,4 @@ async def test_bad_key(find_ev_device):
 
     rfid.comms.request.assert_called()
     rfid.comms.request.assert_awaited()
-    rfid.comms.request.assert_called_with("authenticator", expected_req)
+    rfid.comms.request.assert_called_with("authorizer", expected_req)

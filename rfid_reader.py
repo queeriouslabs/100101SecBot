@@ -70,7 +70,7 @@ class RfidReader:
         the end of an input string.
 
         When enter is found, the string is assemled and sent to the
-        `authenticator` component with a permission request to open the front
+        `authorizer` component with a permission request to open the front
         door.
         """
         keys = []
@@ -94,7 +94,7 @@ class RfidReader:
                 identifier = "".join(map(str, keys))
                 try:
                     # ignores response
-                    await self.comms.request("authenticator",
+                    await self.comms.request("authorizer",
                                            make_request(self.name, identifier))
                 except ValueError as e:
                     self.comms.logger.error(f"Auth request failed with {e}")
