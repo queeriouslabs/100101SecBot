@@ -34,7 +34,7 @@ class Authorizer:
         self.comms = create_comms("authorizer")
         self.hours = None
         self.rfids = None
-        self.authorities = ['/front_door/open']
+        self.authorities = ['/open']
         self.load_acl_data()
 
     def load_acl_data(self):
@@ -84,15 +84,20 @@ class Authorizer:
             request['permissions'][i]['grant'] = grant
 
     async def process(self):
+
+        self.comms.start()
+
         while True:
             request = await self.comms.in_q.get()
             validate_request(request)
 
             target_id = request['target_id']
-            if target_id == 'front_door':
+            self.comms.logger.info(f"Got request for {target_id}")
+            if target_id == 'front_door_latch':
                 self.grant_permissions(request)
 
             response = request.copy()
+            self.comms.logger.info(f"sent request: {request}")
             await self.comms.request(target_id, request)
 
 

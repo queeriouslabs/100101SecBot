@@ -33,6 +33,7 @@ async def test_init(relayOFF, relayON):
 
     task.cancel()
     front_door.comms.logger.handlers.clear()
+    front_door.comms.stop()
 
 
 @pytest.mark.asyncio
@@ -47,7 +48,7 @@ async def test_open(relayOFF, relayON):
     open_req = {
         'permissions': [{
             'grant': True,
-            'perm': '/front_door/open'}, ]}
+            'perm': '/open'}, ]}
 
     await front_door.comms.in_q.put(open_req)
     await front_door.open.wait()
@@ -56,6 +57,7 @@ async def test_open(relayOFF, relayON):
     assert not front_door.open.is_set()
     task.cancel()
     front_door.comms.logger.handlers.clear()
+    front_door.comms.stop()
 
 
 @pytest.mark.asyncio
@@ -70,7 +72,7 @@ async def test_open_already_open(unlock_coro, relayOFF, relayON):
     open_req = {
         'permissions': [{
             'grant': True,
-            'perm': '/front_door/open'}, ]}
+            'perm': '/open'}, ]}
 
     # set relay as open
     front_door.open.set()
@@ -81,6 +83,7 @@ async def test_open_already_open(unlock_coro, relayOFF, relayON):
 
     task.cancel()
     front_door.comms.logger.handlers.clear()
+    front_door.comms.stop()
 
 
 @pytest.mark.asyncio
@@ -96,7 +99,7 @@ async def test_relay_failure(relayOFF, relayON):
     open_req = {
         'permissions': [{
             'grant': True,
-            'perm': '/front_door/open'}, ]}
+            'perm': '/open'}, ]}
 
     await front_door.comms.in_q.put(open_req)
     await front_door.failed.wait()
@@ -104,6 +107,7 @@ async def test_relay_failure(relayOFF, relayON):
 
     task.cancel()
     front_door.comms.logger.handlers.clear()
+    front_door.comms.stop()
 
 
 @pytest.mark.asyncio
@@ -117,7 +121,7 @@ async def test_relay_hot(relayOFF, relayON):
     open_req = {
         'permissions': [{
             'grant': True,
-            'perm': '/front_door/open'}, ]}
+            'perm': '/open'}, ]}
 
     # make relay hot
     front_door.cool.clear()
@@ -134,3 +138,4 @@ async def test_relay_hot(relayOFF, relayON):
 
     task.cancel()
     front_door.comms.logger.handlers.clear()
+    front_door.comms.stop()

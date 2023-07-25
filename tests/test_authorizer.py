@@ -21,7 +21,7 @@ def test_authorizer_init(read_data):
         },
         'rfids': {
             '01234567890' : {
-                'times': 'allhours',
+                'access_times': 'allhours',
                 'sponsor': 'beka' }}
     }
     read_data.return_value = test_data
@@ -56,7 +56,7 @@ def test_authorizer_lookup(read_data, dt):
 
     authy = Authorizer()
 
-    permission = "/front_door/open"
+    permission = "/open"
     ctx_1 = {'identity' : rfid1}
     ctx_2 = {'identity' : rfid2}
     ctx_3 = {'identity' : rfid3}
@@ -118,7 +118,7 @@ def test_authorizer_grant_permissions(read_data, dt):
     }
     read_data.return_value = test_data
 
-    permission = "/front_door/open"
+    permission = "/open"
     ctx_1 = {'identity' : rfid1}
     ctx_2 = {'identity' : rfid2}
     ctx_3 = {'identity' : rfid3}
@@ -176,26 +176,26 @@ async def test_authorizer_process(read_data, dt):
     }
     read_data.return_value = test_data
 
-    permission = "/front_door/open"
+    permission = "/open"
     ctx_1 = {'identity' : rfid1}
     ctx_2 = {'identity' : rfid2}
     ctx_3 = {'identity' : rfid3}
 
     req_1 = {
         "source_id": "test_source",
-        "target_id": "front_door",
+        "target_id": "front_door_latch",
         "permissions" : [{
             "perm": permission,
             "ctx": ctx_1 }]}
     req_2 = {
         "source_id": "test_source",
-        "target_id": "front_door",
+        "target_id": "front_door_latch",
         "permissions" : [{
             "perm": permission,
             "ctx": ctx_2 }]}
     req_3 = {
         "source_id": "test_source",
-        "target_id": "front_door",
+        "target_id": "front_door_latch",
         "permissions" : [{
             "perm": permission,
             "ctx": ctx_3 }]}
@@ -218,4 +218,5 @@ async def test_authorizer_process(read_data, dt):
     authy.comms.request.assert_awaited_with(exp_1['target_id'], exp_1)
     authy.comms.request.assert_called_with(exp_1['target_id'], exp_1)
 
+    authy.comms.stop()
     process.cancel()

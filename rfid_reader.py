@@ -27,7 +27,7 @@ def make_request(source_id, identifier):
         "target_id": "front_door_latch",
         "permissions": [{
             "perm": "/open",
-            "context": {"identifier": identifier}}]
+            "ctx": {"identity": identifier}}]
     }
     return req
 

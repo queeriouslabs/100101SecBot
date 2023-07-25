@@ -57,7 +57,7 @@ def test_make_request():
     req = make_request(src, ident)
 
     assert req["source_id"] == src
-    assert req["permissions"][0]["context"]["identifier"] == ident
+    assert req["permissions"][0]["ctx"]["identity"] == ident
 
 
 @pytest.mark.skip

@@ -74,7 +74,7 @@ class Comms:
         self.callback = None
         self.config = None
         self.connections = {}
-        self.logger = logging.getLogger(__name__)
+        self.logger = logging.getLogger(name)
         self.server = None
         self.socket_root = "."
         self.in_q = asyncio.Queue()
@@ -216,9 +216,6 @@ class Comms:
         """
 
         validate_request(req)
-        target = req['target_id']
-        if target != addr:
-            raise ValueError(f"addr: {addr} and target: {target} mismatched")
 
         sock_path = f"{self.socket_root}/{addr}.sock"
         reader, writer = await asyncio.open_unix_connection(sock_path)

@@ -99,6 +99,8 @@ class Relay:
         latch is cooling down, wait, then process the request for the
         correct permissions.
         '''
+        self.comms.start()
+
         while not self.failed.is_set():
             req = await self.comms.in_q.get()
 
@@ -113,14 +115,13 @@ class Relay:
             # OK, time to check if we actually handle the permission requested
             for perm in req['permissions']:
                 # only need to handle the first grant to open door
-                if (perm['grant'] and (perm['perm'] == "/front_door/open")):
+                if (perm['grant'] and (perm['perm'] == "/open")):
                     asyncio.create_task(self.unlock())
                     break  # break for loop, only need first open perm
 
 
 if __name__ == "__main__":
-    front_door = Relay("front_door")
-    front_door.comms.start()
+    front_door = Relay("front_door_latch")
     loop = asyncio.get_event_loop()
     loop.run_until_complete(front_door.process())
     RELAY.relayOFF(0, 2) # uhh...just in case an error occurred
