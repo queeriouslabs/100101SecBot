@@ -42,7 +42,7 @@ class Relay:
         self.open = asyncio.Event()
         self.cool = asyncio.Event()
         self.failed.clear()
-        self.cool.clear()
+        self.cool.set()
         RELAY.relayOFF(0, 2)
 
     async def cooldown(self):
