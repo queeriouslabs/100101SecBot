@@ -1,0 +1,18 @@
+[Unit]
+Description=RFID Reader for Front Door Latch Access
+After=network.target
+
+[Service]
+Type=simple
+
+LogNamespace=keep
+
+WorkingDirectory=/home/marcidy/100101SecBot
+
+Environment="QUEERIOUSLABS_ENV=PROD"
+ExecStart=/home/marcidy/100101SecBot/rfid_reader.py
+Restart=Always
+RestartSec=1s
+
+[Install]
+WantedBy=multi-user.target
