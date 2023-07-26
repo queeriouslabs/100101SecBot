@@ -1,3 +1,4 @@
+six
 pi-plates
 spidev
 RPi.GPIO

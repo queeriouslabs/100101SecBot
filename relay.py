@@ -42,8 +42,8 @@ class Relay:
         self.open = asyncio.Event()
         self.cool = asyncio.Event()
         self.failed.clear()
-        self.cool.set()
-        self.relay_off()
+        self.cool.clear()
+        RELAY.relayOFF(0, 2)
 
     async def cooldown(self):
         ''' If the latch is hot, waits for 3s before setting it to cool '''

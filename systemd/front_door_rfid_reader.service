@@ -11,7 +11,7 @@ WorkingDirectory=/home/marcidy/100101SecBot
 
 Environment="QUEERIOUSLABS_ENV=PROD"
 ExecStart=/home/marcidy/venv/bin/python3 /home/marcidy/100101SecBot/rfid_reader.py
-Restart=Always
+Restart=always
 RestartSec=1s
 
 [Install]

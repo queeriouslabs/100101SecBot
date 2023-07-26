@@ -55,7 +55,7 @@ class RfidReader:
             self.comms.logger.info(f"Found {label}")
 
         for d in devices:
-            if d != label:
+            if d != rfid_reader:
                 d.close()
 
         return rfid_reader
