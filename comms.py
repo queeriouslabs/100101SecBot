@@ -312,6 +312,7 @@ def create_comms(name):
     else:
         comms_config = Config()
 
+    comms.socket_root = comms_config.SOCKET_ROOT
     comms.config = comms_config
     config_logging(comms, comms_config)
     comms.logger.info(f"App {name} initialized")
