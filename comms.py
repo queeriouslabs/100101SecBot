@@ -231,7 +231,7 @@ class Comms:
         try:
             data = json.loads(data)
         except JSONDecodeError as e:
-            self.logger(f"{e}")
+            self.logger.error(f"{e}")
 
         validate_response(data)
         return data
