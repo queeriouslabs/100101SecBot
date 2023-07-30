@@ -228,6 +228,8 @@ class Comms:
         writer.close()
         await writer.wait_closed()
 
+        if data == b'':
+            return {}
         try:
             data = json.loads(data)
         except JSONDecodeError as e:
