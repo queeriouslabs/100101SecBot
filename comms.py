@@ -241,7 +241,7 @@ class Comms:
     async def response(self):
         """ A response is always sent back to a connected client.
 
-        Data put into the out_q MUST  be a valid response (see schema.py).
+        Data put into the out_q MUST be a valid response (see schema.py).
 
         The source_id of the response is where the response is going.
 

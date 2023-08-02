@@ -46,6 +46,21 @@ response_schema = {
     "properties": {
         "source_id": {"type": "string"},
         "target_id": {"type": "string"},
+        "context" : {"type": "object"},
+        "code": {"type": "integer"},
+        "msg": {"type": "string"}
+    },
+    "required": ["source_id", "target_id", "code", "msg"]
+}
+
+
+grant_schema = {
+    "$id": "/schemas/grant",
+
+    "type": "object",
+    "properties": {
+        "source_id": {"type": "string"},
+        "target_id": {"type": "string"},
         "perm": permission_schema,
         "grant": {"type":  "boolean"},
         "context" : {"type": "object"}
@@ -59,7 +74,7 @@ error_schema = {
 
     "type": "object",
     "properties": {
-        "error_code": {"type": "int"},
+        "error_code": {"type": "integer"},
         "error_msg": {"type": "string"}
     },
     "required": ["error_code", "error_msg"]
@@ -71,6 +86,9 @@ def validate_permission(data):
 
 def validate_request(data):
     validate(data, request_schema)
+
+def validate_grant(data):
+    validate(data, grant_schema)
 
 def validate_response(data):
     validate(data, response_schema)

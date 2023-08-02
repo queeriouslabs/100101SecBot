@@ -28,6 +28,7 @@ may be awaited, checked, or toggled via coroutines.
 On initialization the relay is closed.
 """
 import asyncio
+from copy import deepcopy
 import time
 import piplates.RELAYplate as RELAY
 from comms import create_comms
@@ -103,6 +104,13 @@ class Relay:
 
         while not self.failed.is_set():
             req = await self.comms.in_q.get()
+
+            # send off response
+            resp = deepcopy(req)
+            resp.pop('permissions')
+            resp['code'] = 0
+            resp['msg'] = "OK"
+            await self.comms.out_q.put(resp)
 
             # don't need to process a request if it's already opened
             if self.open.is_set():

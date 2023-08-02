@@ -26,11 +26,14 @@ class MockEvDevice:
         self.scans = asyncio.Queue()
 
     async def async_read_loop(self):
-        for attempt in await self.scans.get():
-            yield attempt
+        while True:
+            yield await self.scans.get()
+        # for attempt in await self.scans.get():
+            # yield attempt
 
     def scan(self, input):
-        self.scans.put_nowait(self.string_to_ecode_list(input, True))
+        for ev in self.string_to_ecode_list(input, True):
+            self.scans.put_nowait(ev)
 
     def incomplete_scan(self, input):
         self.scans.put_nowait(self.string_to_ecode_list(intput, False))

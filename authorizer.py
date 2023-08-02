@@ -1,10 +1,12 @@
 import asyncio
 import csv
+from copy import deepcopy
 from datetime import datetime
 from comms import create_comms
 from schema import (
     validate_request,
 )
+
 import pudb
 
 
@@ -91,14 +93,21 @@ class Authorizer:
             request = await self.comms.in_q.get()
             validate_request(request)
 
-            target_id = request['target_id']
+            grant = deepcopy(request)
+            # create and send out response
+            response = deepcopy(request)
+            response['code'] = 0
+            response['msg'] = "OK"
+            response.pop('permissions')
+            await self.comms.out_q.put(response)
+
+            target_id = grant['target_id']
             self.comms.logger.info(f"Got request for {target_id}")
             if target_id == 'front_door_latch':
-                self.grant_permissions(request)
+                self.grant_permissions(grant)
 
-            response = request.copy()
-            self.comms.logger.info(f"sent request: {request}")
-            await self.comms.request(target_id, request)
+            self.comms.logger.info(f"sent request: {grant}")
+            await self.comms.request(target_id, grant)
 
 
 if __name__ == "__main__":

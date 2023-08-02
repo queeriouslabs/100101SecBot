@@ -60,12 +60,17 @@ async def test_client_server_communication():
         data = await comms.in_q.get()
         client = data['source_id']
 
-        permissions = data.pop('permissions')
-        for perm in permissions:
-            resp = data.copy()
-            resp['perm'] = perm
-            resp['grant'] = True
-            await comms.out_q.put(resp)
+        resp = data.copy()
+        resp.pop('permissions')
+        resp['code'] = 0
+        resp['msg'] = "Success"
+        await comms.out_q.put(resp)
+
+        # permissions = data.pop('permissions')
+        # for perm in permissions:
+            # grant = data.copy()
+            # grant['perm'] = perm
+            # grant['grant'] = True
 
     test_server_name = "test_server_name"
     server = create_comms(test_server_name)
@@ -89,14 +94,22 @@ async def test_client_server_communication():
         "permissions": [ permission ]}
     schema.validate_request(request)
 
-    response = {
+    grant = {
         "source_id": test_client_name,
         "target_id": test_server_name,
         "perm": permission,
         "grant": True
     }
-    schema.validate_response(response)
+    schema.validate_grant(grant)
+
+    resp = {
+        "source_id": test_client_name,
+        "target_id": test_server_name,
+        "code": 0,
+        "msg": "Success"
+    }
+    schema.validate_response(resp)
 
     server_response = await client.request(test_server_name, request)
-    assert server_response == response
+    assert server_response == resp
     server.stop()
