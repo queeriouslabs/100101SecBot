@@ -77,7 +77,8 @@ class Relay:
         failed, which sets the "relay_failed" event and exits the
         coroutine.
         '''
-        cooldown_marker = time.time() #: Track waiting time for relay to open
+        self.comms.info("in unlock()")
+        cooldown_marker = time.time()  #: Track waiting time for relay to open
         while not self.open.is_set():
             try:
                 self.relay_on()
@@ -104,14 +105,14 @@ class Relay:
 
         while not self.failed.is_set():
             req = await self.comms.in_q.get()
-
+            self.comms.info(f"got req: {req}")
             # send off response
             resp = deepcopy(req)
             resp.pop('permissions')
             resp['code'] = 0
             resp['msg'] = "OK"
             await self.comms.out_q.put(resp)
-
+            self.comms.info("sending response")
             # don't need to process a request if it's already opened
             if self.open.is_set():
                 continue
@@ -120,6 +121,7 @@ class Relay:
             if not self.cool.is_set():
                 await self.cool.wait()
 
+            self.comms.info("sending processing permission")
             # OK, time to check if we actually handle the permission requested
             for perm in req['permissions']:
                 # only need to handle the first grant to open door
@@ -132,4 +134,4 @@ if __name__ == "__main__":
     front_door = Relay("front_door_latch")
     loop = asyncio.get_event_loop()
     loop.run_until_complete(front_door.process())
-    RELAY.relayOFF(0, 2) # uhh...just in case an error occurred
+    RELAY.relayOFF(0, 2)  # uhh...just in case an error occurred

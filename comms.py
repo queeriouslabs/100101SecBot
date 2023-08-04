@@ -173,7 +173,7 @@ class Comms:
                     await writer.wait_closed()
                     raise e
 
-                if(src_id := req.get('source_id')):
+                if (src_id := req.get('source_id')):
                     self.connections[src_id] = (reader, writer)
                     await self.in_q.put(req)
 
@@ -215,18 +215,24 @@ class Comms:
         Expects a single response returned to the caller.
         """
 
+        self.comms.info("validate request")
         validate_request(req)
 
+        self.comms.info("open unix connection")
         sock_path = f"{self.socket_root}/{addr}.sock"
         reader, writer = await asyncio.open_unix_connection(sock_path)
+        self.comms.info("connection opened, write back")
 
         msg = json.dumps(req).encode('utf-8')
         writer.write(msg + b'\n')
         await writer.drain()
 
+        self.comms.info("reading data")
+
         data = await reader.readline()
         writer.close()
         await writer.wait_closed()
+        self.comms.info("writer closed")
 
         if data == b'':
             return {}
@@ -235,7 +241,10 @@ class Comms:
         except JSONDecodeError as e:
             self.logger.error(f"{e}")
 
+        self.comms.info("pre-validate")
+
         validate_response(data)
+        self.comms.info("validated")
         return data
 
     async def response(self):
