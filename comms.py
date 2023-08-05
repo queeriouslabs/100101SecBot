@@ -37,6 +37,9 @@ from schema import (
 )
 
 
+import pudb
+
+
 class Comms:
     """ This class abstracts communication between components.
 
@@ -72,22 +75,28 @@ class Comms:
     def __init__(self, name):
         self.name = name
         self.callback = None
+        self.clients = {}
         self.config = None
         self.connections = {}
         self.logger = logging.getLogger(name)
         self.server = None
+        self.servers = {}
         self.socket_root = "."
         self.in_q = asyncio.Queue()
         self.out_q = asyncio.Queue()
         self.set_callback()
         self.tasks = {}
 
+    def set_config(self, config):
+        self.config = config
+        self.socket_root = config.SOCKET_ROOT
+
     def start(self):
         """ Start's a server listening to a unix domain socket which is
         located in the `self.socket_root` directory with filename
         `{self.name}.sock`.
 
-        Adds signal handlers for SIGTERM and SITINT to call self.cleanup.
+        Adds signal handlers for SIGTERM and SIGINT to call self.cleanup.
         """
         self.server = asyncio.start_unix_server(
             self.callback,
@@ -174,25 +183,26 @@ class Comms:
                     raise e
 
                 if (src_id := req.get('source_id')):
-                    self.connections[src_id] = (reader, writer)
+                    if src_id not in self.clients:
+                        self.clients[src_id] = (reader, writer)
                     await self.in_q.put(req)
 
         self.callback = client_callback
 
     async def connect(self, server):
         """ Make a connection to a local unix domain socket in the
-        socket_root directory and keeps the connection in self.connections.
+        socket_root directory and keeps the connection in self.servers.
         """
-        if server not in self.connections:
+        if server not in self.servers:
             sock_path = self.socket_root + "/" + server + ".sock"
             reader, writer = await asyncio.open_unix_connection(sock_path)
-            self.connections[server] = (reader, writer)
+            self.servers[server] = (reader, writer)
 
     async def disconnect(self, conn_name):
-        """ Disconnects from a local unix domain socket in self.connections.
+        """ Disconnects from a local unix domain socket in self.servers.
         """
-        if conn_name in self.connections:
-            reader, writer = self.connections.pop(conn_name)
+        if conn_name in self.servers:
+            reader, writer = self.servers.pop(conn_name)
             writer.close()
             await writer.wait_closed()
 
@@ -218,9 +228,15 @@ class Comms:
         self.logger.info("validate request")
         validate_request(req)
 
-        self.logger.info("open unix connection")
-        sock_path = f"{self.socket_root}/{addr}.sock"
-        reader, writer = await asyncio.open_unix_connection(sock_path)
+        if addr not in self.servers:
+            self.logger.info("open unix connection")
+            sock_path = f"{self.socket_root}/{addr}.sock"
+            reader, writer = await asyncio.open_unix_connection(sock_path)
+            self.servers[addr] = (reader, writer)
+        else:
+            reader, writer = self.servers[addr]
+            # pudb.set_trace()
+
         self.logger.info("connection opened, write back")
 
         msg = json.dumps(req).encode('utf-8')
@@ -230,9 +246,9 @@ class Comms:
         self.logger.info("reading data")
 
         data = await reader.readline()
-        writer.close()
-        await writer.wait_closed()
-        self.logger.info("writer closed")
+        # writer.close()
+        # await writer.wait_closed()
+        # self.logger.info("writer closed")
 
         if data == b'':
             return {}
@@ -254,7 +270,7 @@ class Comms:
 
         The source_id of the response is where the response is going.
 
-        The source_id ought to be in self.connections dict to use the
+        The source_id ought to be in self.clients dict to use the
         connection created via the server's client_callback.
 
         The Server does not close the connections.
@@ -270,8 +286,8 @@ class Comms:
 
             client_id = data['source_id']
             msg = json.dumps(data).encode('utf-8')
-            if client_id in self.connections:
-                _, client = self.connections[client_id]
+            if client_id in self.clients:
+                _, client = self.clients[client_id]
                 client.write(msg + b'\n')
                 await client.drain()
 
@@ -321,8 +337,7 @@ def create_comms(name):
     else:
         comms_config = Config()
 
-    comms.socket_root = comms_config.SOCKET_ROOT
-    comms.config = comms_config
+    comms.set_config(comms_config)
     config_logging(comms, comms_config)
     comms.logger.info(f"App {name} initialized")
     return comms

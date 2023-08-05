@@ -45,10 +45,10 @@ async def test_client_server_connections():
     client = create_comms(test_client_name)
 
     await client.connect(test_server_name)
-    assert test_server_name in client.connections
+    assert test_server_name in client.servers
 
     await client.disconnect(test_server_name)
-    assert test_server_name not in client.connections
+    assert test_server_name not in client.servers
 
     server.stop()
 
