@@ -3,11 +3,6 @@ import csv
 from copy import deepcopy
 from datetime import datetime
 from comms import create_comms
-from schema import (
-    validate_request,
-)
-
-import pudb
 
 
 def read_data():
@@ -91,7 +86,6 @@ class Authorizer:
 
         while True:
             request = await self.comms.in_q.get()
-            validate_request(request)
 
             grant = deepcopy(request)
             # create and send out response

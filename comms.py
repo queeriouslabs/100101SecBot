@@ -9,16 +9,10 @@ Python's asyncio manages both with similar approaches but separate function
 calls.
 
 Abstracting out the commuication allows easy replacement as needed.
-
-The input and output channels of Comms include validation of the passed
-objects against schema.  The input/output data is this validated by the Comms
-module and the user of the module does not have to worry about validation,
-though is reposnsible for assemling valid objects.
 """
 import asyncio
 import json
 from json import JSONDecodeError
-from jsonschema import ValidationError
 import logging
 from logging.handlers import TimedRotatingFileHandler
 import os
@@ -30,10 +24,6 @@ from signal import (
 from settings import (
     Config,
     ProdConfig
-)
-from schema import (
-    validate_request,
-    validate_response,
 )
 
 
@@ -144,9 +134,10 @@ class Comms:
             That string MUST be decodeable as 'utf-8' into a valid
             JSON string.
 
-            That JSON string MUST be valid request(see schema.py).
+            That JSON string MUST be valid request(see schema.py), though
+            for performance reasons it's not programmatically validated.
 
-            Once validated, the `source_id` dict member is used as the
+            The request `source_id` dict member is used as the
             client identification and the client connections are stored
             in the self.connetions dict via that key.
 
@@ -167,13 +158,6 @@ class Comms:
                 try:
                     req = json.loads(req.decode('utf-8'))
                 except (AttributeError, JSONDecodeError) as e:
-                    writer.close()
-                    await writer.wait_closed()
-                    raise e
-
-                try:
-                    validate_request(req)
-                except ValidationError as e:
                     writer.close()
                     await writer.wait_closed()
                     raise e
@@ -221,8 +205,6 @@ class Comms:
         Expects a single response returned to the caller.
         """
 
-        validate_request(req)
-
         if addr not in self.servers:
             sock_path = f"{self.socket_root}/{addr}.sock"
             reader, writer = await asyncio.open_unix_connection(sock_path)
@@ -243,7 +225,6 @@ class Comms:
         except JSONDecodeError as e:
             self.logger.error(f"{e}")
 
-        validate_response(data)
         return data
 
     async def response(self):
@@ -264,8 +245,6 @@ class Comms:
         """
         while True:
             data = await self.out_q.get()
-
-            validate_response(data)
 
             client_id = data['source_id']
             msg = json.dumps(data).encode('utf-8')
