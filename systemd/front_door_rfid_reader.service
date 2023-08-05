@@ -1,6 +1,8 @@
 [Unit]
 Description=RFID Reader for Front Door Latch Access
-After=network.target
+After=front_door_authorizer.service
+Requires=front_door_authorizer.service
+PartOf=front_door_latch.service
 
 [Service]
 Type=simple

@@ -1,6 +1,8 @@
 [Unit]
-Description=RFID Authorizor for Front Door Latch Access
-After=network.target
+Description=RFID Authorizer for Front Door Latch Access
+After=front_door_latch.service
+Requires=front_door_latch.service
+PartOf=front_door_latch.service
 
 [Service]
 Type=simple
