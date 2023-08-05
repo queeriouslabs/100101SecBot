@@ -37,9 +37,6 @@ from schema import (
 )
 
 
-import pudb
-
-
 class Comms:
     """ This class abstracts communication between components.
 
@@ -121,7 +118,6 @@ class Comms:
         task_names = list(self.tasks.keys())
         while self.tasks:
             task = self.tasks.pop(task_names.pop())
-            self.logger.info(f"Cancelling {task}")
             task.cancel()
 
     def cleanup(self):
@@ -225,11 +221,9 @@ class Comms:
         Expects a single response returned to the caller.
         """
 
-        self.logger.info("validate request")
         validate_request(req)
 
         if addr not in self.servers:
-            self.logger.info("open unix connection")
             sock_path = f"{self.socket_root}/{addr}.sock"
             reader, writer = await asyncio.open_unix_connection(sock_path)
             self.servers[addr] = (reader, writer)
@@ -237,18 +231,10 @@ class Comms:
             reader, writer = self.servers[addr]
             # pudb.set_trace()
 
-        self.logger.info("connection opened, write back")
-
         msg = json.dumps(req).encode('utf-8')
         writer.write(msg + b'\n')
         await writer.drain()
-
-        self.logger.info("reading data")
-
         data = await reader.readline()
-        # writer.close()
-        # await writer.wait_closed()
-        # self.logger.info("writer closed")
 
         if data == b'':
             return {}
@@ -257,10 +243,7 @@ class Comms:
         except JSONDecodeError as e:
             self.logger.error(f"{e}")
 
-        self.logger.info("pre-validate")
-
         validate_response(data)
-        self.logger.info("validated")
         return data
 
     async def response(self):
