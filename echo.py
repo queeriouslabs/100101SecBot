@@ -42,8 +42,8 @@ async def process():
         permissions = data.pop('permissions')
         for perm in permissions:
             resp = data.copy()
-            resp['perm'] = perm
-            resp['grant'] = True
+            resp['code'] = 0
+            resp['msg'] = "Success"
             await comms.out_q.put(resp)  # outgoing data into the out_q
 
 
