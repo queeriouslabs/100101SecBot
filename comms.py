@@ -234,20 +234,27 @@ class Comms:
             sock_path = f"{self.socket_root}/{addr}.sock"
             reader, writer = await asyncio.open_unix_connection(sock_path)
             self.servers[addr] = (reader, writer)
+            self.logger.info(f"New connection made to {addr}")
         else:
+            self.logger.info(f"Found connection: {addr}")
             reader, writer = self.servers[addr]
 
+        self.logger.info(f"Sending req to {addr}")
         msg = json.dumps(req).encode('utf-8')
         writer.write(msg + b'\n')
         await writer.drain()
+        self.logger.info(f"Waiting on response from {addr}")
         data = await reader.readline()
 
+        self.logger.info(f"Got response from {addr}")
         if data == b'':
             return {}
         try:
             data = json.loads(data)
         except JSONDecodeError as e:
             self.logger.error(f"{e}")
+
+        self.logger.info(f"{addr} said: {data}")
 
         return data
 
