@@ -99,6 +99,7 @@ class RfidReader:
                 except ValueError as e:
                     self.comms.logger.error(f"Auth request failed with {e}")
                 keys = []
+                self.comms.logger.info("Read complete")
 
 
 if __name__ == "__main__":

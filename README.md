@@ -33,8 +33,13 @@ Restart the services
 
 ```bash
 $ sudo systemctl restart front_door_latch.service
+```
 
 If that doesn't work, check dmesg for errors related to USB devices
 
+```
 $ sudo dmesg -xT
 ```
+
+# Updates
+Do not update on the pi.  Update on a local repo, run pytest to ensure no test failures, and create a PR.  Ping matt.
