@@ -1,9 +1,9 @@
 [Unit]
 Description=RFID Reader for Front Door Latch Access
 After=front_door_authorizer.service
-# Requires=front_door_authorizer.service
-# PartOf=front_door_latch.service
-# BindsTo=front_door_latch.service
+Requires=front_door_authorizer.service
+PartOf=front_door_latch.service
+BindsTo=front_door_latch.service
 
 [Service]
 Type=simple
