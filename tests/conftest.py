@@ -76,8 +76,8 @@ def test_rfid_reader(find_ev_device, ev_device):
 
 
 @pytest.fixture
-@patch('authorizer.read_data')
-def test_authorizer(read_data):
+@patch('authorizer.read_acl_data')
+def test_authorizer(read_acl_data):
     test_data = {
         'hours': {
             'allhours': [0, 24],
@@ -91,7 +91,7 @@ def test_authorizer(read_data):
                 'access_times': 'daytime',
                 'sponsor': 'matt' }}
     }
-    read_data.return_value = test_data
+    read_acl_data.return_value = test_data
     return Authorizer()
 
 

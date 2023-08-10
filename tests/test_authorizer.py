@@ -12,7 +12,7 @@ from authorizer import (
 )
 
 
-@patch("authorizer.read_data")
+@patch("authorizer.read_acl_data")
 def test_authorizer_init(read_data):
     test_data = {
         'hours': {
@@ -33,7 +33,7 @@ def test_authorizer_init(read_data):
 
 
 @patch('authorizer.datetime')
-@patch("authorizer.read_data")
+@patch("authorizer.read_acl_data")
 def test_authorizer_lookup(read_data, dt):
     rfid1 = '0000000001'
     rfid2 = '0000000002'
@@ -97,7 +97,7 @@ def test_authorizer_lookup(read_data, dt):
 
 
 @patch('authorizer.datetime')
-@patch('authorizer.read_data')
+@patch('authorizer.read_acl_data')
 def test_authorizer_grant_permissions(read_data, dt):
     rfid1 = '0000000001'
     rfid2 = '0000000002'
@@ -155,7 +155,7 @@ def test_authorizer_grant_permissions(read_data, dt):
 
 @pytest.mark.asyncio
 @patch('authorizer.datetime')
-@patch('authorizer.read_data')
+@patch('authorizer.read_acl_data')
 async def test_authorizer_process(read_data, dt):
     rfid1 = '0000000001'
     rfid2 = '0000000002'
