@@ -163,6 +163,14 @@ class Comms:
                     raise e
 
                 if (src_id := req.get('source_id')):
+                    if src_id in self.clients:
+                        temp_r, temp_w = self.clients.pop(src_id)
+                        try:
+                            temp_w.close()
+                            await temp_w.wait_closed()
+                        except Exception as e:
+                            self.logger(f"{e}")
+                            # prev connection is dead, who cares
                     if src_id not in self.clients:
                         self.clients[src_id] = (reader, writer)
                     await self.in_q.put(req)
@@ -211,7 +219,6 @@ class Comms:
             self.servers[addr] = (reader, writer)
         else:
             reader, writer = self.servers[addr]
-            # pudb.set_trace()
 
         msg = json.dumps(req).encode('utf-8')
         writer.write(msg + b'\n')
