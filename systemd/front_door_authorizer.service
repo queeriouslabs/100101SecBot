@@ -10,7 +10,7 @@ After=front_door_latch.service
 Type=simple
 
 LogNamespace=keep
-
+RuntimeDirectory=queeriouslabs
 WorkingDirectory=/home/marcidy/100101SecBot
 
 Environment="QUEERIOUSLABS_ENV=PROD"
