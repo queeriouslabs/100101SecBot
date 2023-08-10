@@ -220,3 +220,59 @@ async def test_authorizer_process(read_data, dt):
 
     authy.comms.stop()
     process.cancel()
+
+
+@pytest.mark.asyncio
+@patch("authorizer.read_acl_data")
+async def test_authorizer_reload(read_data):
+    base_data = {
+        'hours': {
+            'allhours': [0, 24],
+            'daytime': [11, 22]
+        },
+        'rfids': {
+            '01234567890' : {
+                'access_times': 'allhours',
+                'sponsor': 'beka' }}
+    }
+    read_data.return_value = base_data
+
+    test_data = {
+        'hours': {
+            'allhours': [0, 24],
+            'daytime': [11, 22]
+        },
+        'rfids': {
+            '01234567890' : {
+                'access_times': 'allhours',
+                'sponsor': 'beka' },
+            '5463728190' : {
+                'access_times': 'daytime',
+                'sponsor': 'matt' }}
+    }
+    authy = Authorizer()
+
+    assert authy.hours == base_data['hours']
+    assert authy.rfids == base_data['rfids']
+    assert authy.rfids != test_data['rfids']
+
+    read_data.return_value = test_data
+
+    req = {
+        "source_id": "test_source",
+        "target_id": "authorizer",
+        "permissions" : [{
+            "perm": "/reload",
+            "ctx": {} }]}
+
+    process = asyncio.create_task(authy.process())
+    await asyncio.sleep(0)
+
+    await authy.comms.in_q.put(req)
+    await asyncio.sleep(0)
+
+    assert authy.hours == test_data['hours']
+    assert authy.rfids == test_data['rfids']
+
+    authy.comms.stop()
+    process.cancel()
