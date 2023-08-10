@@ -8,7 +8,7 @@ Type=simple
 LogNamespace=keep
 
 WorkingDirectory=/home/marcidy/100101SecBot
-
+RuntimeDirectory=queeriouslabs
 Environment="QUEERIOUSLABS_ENV=PROD"
 ExecStart=/home/marcidy/venv/bin/python3 /home/marcidy/100101SecBot/relay.py
 Restart=always
