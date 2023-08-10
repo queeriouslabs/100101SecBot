@@ -1,4 +1,5 @@
 import csv
+import pudb
 
 
 def read_acl_data():
@@ -24,22 +25,22 @@ def read_acl_data():
 def write_rfid_data(rfids):
     """ writes the rfids.csv file in the data directory """
     with open('data/rfids.csv', 'w') as csvfile:
-        writer = csv.writer(csvfile, delimiters=',',
+        writer = csv.writer(csvfile, delimiter=',',
                             quotechar='"', quoting=csv.QUOTE_MINIMAL)
         writer.writerow(['rfid', 'access_times', 'sponsor'])
         for rfid in rfids:
-            writer.writerow([rfids['rfid'],
-                             rfids['access_times'],
-                             rfids['sponsor']])
+            writer.writerow([rfid,
+                             rfids[rfid]['access_times'],
+                             rfids[rfid]['sponsor']])
 
 
 def write_hours_data(hours):
     """ writes the hours.csv file in the data directory """
     with open('data/hours.csv', 'w') as csvfile:
-        writer = csv.writer(csvfile, delimiters=',',
+        writer = csv.writer(csvfile, delimiter=',',
                             quotechar='"', quoting=csv.QUOTE_MINIMAL)
         writer.writerow(['name', 'start_hour', 'end_hour'])
         for level in hours:
-            writer.writerow(level['name'],
-                            level['start_hour'],
-                            level['end_hour'])
+            writer.writerow(level,
+                            hours[level][0],
+                            hours[level][1])
