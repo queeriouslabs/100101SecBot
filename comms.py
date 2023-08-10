@@ -149,6 +149,31 @@ class Comms:
             The server will close connections on errors in the incoming
             data.
             """
+            req = await reader.readline()
+            if reader.at_eof():
+                return
+            if (req == b''):
+                return
+            try:
+                req = json.loads(req.decode('utf-8'))
+            except (AttributeError, JSONDecodeError) as e:
+                writer.close()
+                await writer.wait_closed()
+                raise e
+
+            if (src_id := req.get('source_id')):
+                if src_id in self.clients:
+                    temp_r, temp_w = self.clients.pop(src_id)
+                    try:
+                        temp_w.close()
+                        await temp_w.wait_closed()
+                    except Exception as e:
+                        self.logger(f"{e}")
+
+                if src_id not in self.clients:
+                    self.clients[src_id] = (reader, writer)
+                await self.in_q.put(req)
+
             while True:
                 req = await reader.readline()
                 if reader.at_eof():
@@ -163,14 +188,6 @@ class Comms:
                     raise e
 
                 if (src_id := req.get('source_id')):
-                    if src_id in self.clients:
-                        temp_r, temp_w = self.clients.pop(src_id)
-                        try:
-                            temp_w.close()
-                            await temp_w.wait_closed()
-                        except Exception as e:
-                            self.logger(f"{e}")
-                            # prev connection is dead, who cares
                     if src_id not in self.clients:
                         self.clients[src_id] = (reader, writer)
                     await self.in_q.put(req)
