@@ -8,7 +8,8 @@ from database import read_acl_data
 class Authorizer:
 
     def __init__(self):
-        self.comms = create_comms("authorizer")
+        self.name = "authorizer"
+        self.comms = create_comms(self.name)
         self.hours = None
         self.rfids = None
         self.authorities = ['/open']
