@@ -70,6 +70,8 @@ async def notify_authorizer():
         msg = "Please check Authorizer."
     color_print([(color, msg)])
     await link.disconnect("authorizer")
+    # turn off logging handler for this link
+    link.logger.handlers.clear()
 
 
 def inquire_sponsors(rfids, cur_sponsor=None):
@@ -123,9 +125,10 @@ def add_rfid_handler(rfids, hours, dirty):
         new_rfid = inquirer.text(
             message="Please enter new RFID: ",
             mandatory=True,
-            validate=lambda result: len(result) > 0,
-            invalid_message="Input cannot be empty",
         ).execute()
+
+        if not new_rfid:
+            return dirty
 
         if new_rfid in rfids:
             next_step = inquirer.select(
