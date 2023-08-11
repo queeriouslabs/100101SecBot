@@ -1,20 +1,16 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S QUEERIOUSLABS_ENV=PROD python3
 """
 Based on https://codeburst.io/building-beautiful-command-line-interfaces-with-python-26c7e1bb54df
 
 With changes of course.  PyInquirer is not maintained, replaced with InquirerPy
 """
 import asyncio
-import csv
-import os
-import shutil
 import sys
 
 from pyfiglet import figlet_format
 from termcolor import colored
 from InquirerPy import (
     inquirer,
-    get_style,
 )
 from InquirerPy.base.control import (
     Choice,
@@ -136,7 +132,7 @@ def add_rfid_handler(rfids, hours, dirty):
                 message="RFID exists.  Go Back or Modify it?",
                 choices=["Go Back", "Modify"]
             ).execute()
-            if next_step=="Modify":
+            if next_step == "Modify":
                 return mod_rfid_handler(rfids, hours, dirty, new_rfid)
             else:
                 return dirty
@@ -195,13 +191,13 @@ def mod_rfid_handler(rfids, hours, dirty, target_rfid=None):
                ("yellow", "modified: \n")]
         if (cur_hours != new_hours):
             msg.extend([
-                ("magenta", f"    hours"),
+                ("magenta", "    hours"),
                 ("", " from '"),
                 ("red", f"{cur_hours}"),
                 ("", "' to '"),
                 ("green", f"{new_hours}"),
-                ("","'")])
-            newline=True
+                ("", "'")])
+            newline = True
         if (cur_sponsor != new_sponsor):
             if newline:
                 msg.append(("", "\n"))
@@ -211,14 +207,14 @@ def mod_rfid_handler(rfids, hours, dirty, target_rfid=None):
                 ("red", f"{cur_sponsor}"),
                 ("", "' to '"),
                 ("green", f"{new_sponsor}"),
-                ("","'")])
+                ("", "'")])
         color_print(msg)
 
         confirm = inquirer.confirm(message="Is this correct? ").execute()
         if confirm:
             mod_user(rfids, target_rfid, new_hours, new_sponsor)
-            dirty=True
-            done=True
+            dirty = True
+            done = True
 
     return dirty
 
@@ -240,8 +236,8 @@ def del_rfid_handler(rfids, hours, dirty):
         if confirm:
             del_user(rfids, target_rfid)
             assert target_rfid not in rfids
-            dirty=True
-            done=True
+            dirty = True
+            done = True
 
     return dirty
 
