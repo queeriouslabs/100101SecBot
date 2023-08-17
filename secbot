@@ -303,6 +303,11 @@ def run():
 
 
 def main():
+    euid = os.geteuid()
+    if euid != 0:
+        color_print([("yellow", "Script not started as root, running sudo")])
+        args = ['sudo', sys.executable] + sys.argv + [os.environ]
+        os.execlpe('sudo', *args)
     print(colored(figlet_format("QueeriousLabs\nSecBot", "slant"), "magenta"))
     run()
 
