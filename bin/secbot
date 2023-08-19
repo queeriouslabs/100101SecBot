@@ -1,0 +1,14 @@
+#!/bin/bash
+
+pushd () {
+    command pushd "$@" > /dev/null
+}
+
+popd () {
+    command popd "$@" > /dev/null
+}
+
+pushd /home/marcidy/100101SecBot
+echo "Loading..."
+/home/marcidy/venv/bin/python /home/marcidy/100101SecBot/secbot
+popd

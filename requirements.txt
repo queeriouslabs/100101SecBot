@@ -11,3 +11,6 @@ pytest
 pytest-cov
 pytest-pudb
 pytest-asyncio
+pyfiglet
+termcolor
+InquirerPy

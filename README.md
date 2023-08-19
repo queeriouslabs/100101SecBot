@@ -37,7 +37,7 @@ $ sudo systemctl restart front_door_latch.service
 
 If that doesn't work, check dmesg for errors related to USB devices
 
-```
+```bash
 $ sudo dmesg -xT
 ```
 

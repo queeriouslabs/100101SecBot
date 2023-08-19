@@ -149,11 +149,43 @@ class Comms:
             The server will close connections on errors in the incoming
             data.
             """
+            req = await reader.readline()
+            if reader.at_eof():
+                return
+            if (req == b''):
+                return
+            try:
+                req = json.loads(req.decode('utf-8'))
+            except (AttributeError, JSONDecodeError) as e:
+                writer.close()
+                await writer.wait_closed()
+                raise e
+
+            if (src_id := req.get('source_id')):
+                if src_id in self.clients:
+                    self.logger.error(f"Duplicate connection from {src_id}")
+                    temp_r, temp_w = self.clients.pop(src_id)
+                    try:
+                        temp_w.close()
+                        await temp_w.wait_closed()
+                    except Exception as e:
+                        self.logger(f"{e}")
+
+                if src_id not in self.clients:
+                    self.clients[src_id] = (reader, writer)
+                await self.in_q.put(req)
+
             while True:
                 req = await reader.readline()
+                self.logger.info(f"{src_id} -> {req}")
                 if reader.at_eof():
+                    self.logger.warning(f"Done with {src_id}")
+                    reader, writer = self.clients.pop(src_id)
+                    writer.close()
+                    await writer.wait_closed()
                     break
                 if (req == b''):
+                    self.logger.error("Empty request")
                     continue
                 try:
                     req = json.loads(req.decode('utf-8'))
@@ -213,7 +245,6 @@ class Comms:
         else:
             self.logger.info(f"Found connection: {addr}")
             reader, writer = self.servers[addr]
-            # pudb.set_trace()
 
         self.logger.info(f"Sending req to {addr}")
         msg = json.dumps(req).encode('utf-8')

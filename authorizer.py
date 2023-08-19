@@ -1,34 +1,15 @@
 import asyncio
-import csv
 from copy import deepcopy
 from datetime import datetime
 from comms import create_comms
-
-
-def read_data():
-    """ reads persistent data from the filesystem
-    """
-    hours = {}
-    rfids = {}
-
-    with open("data/hours.csv", 'r') as f:
-        hours_csv = csv.reader(f)
-        next(hours_csv)  # drop header
-        for row in hours_csv:
-            hours[row.pop(0)] = row
-
-    with open("data/rfids.csv", 'r') as f:
-        rfids_csv = csv.DictReader(f)
-        for row in rfids_csv:
-            rfids[row.pop('rfid')] = row
-
-    return {'hours': hours, 'rfids': rfids}
+from database import read_acl_data
 
 
 class Authorizer:
 
     def __init__(self):
-        self.comms = create_comms("authorizer")
+        self.name = "authorizer"
+        self.comms = create_comms(self.name)
         self.hours = None
         self.rfids = None
         self.authorities = ['/open']
@@ -36,9 +17,16 @@ class Authorizer:
 
     def load_acl_data(self):
         """ Load or reload the access control data """
-        new_data = read_data()
+        new_data = read_acl_data()
         self.hours = new_data['hours']
         self.rfids = new_data['rfids']
+
+    def command_handler(self, request):
+        commands = request.pop('permissions')
+        for cmd in commands:
+            if cmd.get('perm') == '/reload':
+                self.load_acl_data()
+                self.comms.logger.warning("Reloading ACL data")
 
     def lookup(self, permission, ctx):
         """ Looks up the requested permission using data in the provided
@@ -86,8 +74,6 @@ class Authorizer:
 
         while True:
             request = await self.comms.in_q.get()
-
-            grant = deepcopy(request)
             # create and send out response
             response = deepcopy(request)
             response['code'] = 0
@@ -95,8 +81,15 @@ class Authorizer:
             response.pop('permissions')
             await self.comms.out_q.put(response)
 
-            target_id = grant['target_id']
+            target_id = request['target_id']
             self.comms.logger.info(f"Got request for {target_id}")
+            # Targetting me, handle it and continue
+            if target_id == self.name:
+                self.command_handler(request)
+                continue
+
+            grant = deepcopy(request)
+
             if target_id == 'front_door_latch':
                 self.grant_permissions(grant)
 
