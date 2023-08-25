@@ -1,7 +1,16 @@
 # 100101SecBot
 A security bot to guard your secret rebel hideout.
 
-# Starting, restarting, and stopping
+# Usage
+If you have access to secbot you ought to be able to run the `secbot` command:
+
+```bash
+$ secbot
+```
+
+Please see the [Instructions](docs/instructions.md) for furthher information.
+
+# Starting, restarting, and stopping services
 Front door access is managed with 3 services, one for the RFID reader, an authorizer, and one to open the latch.
 
 Note: see https://www.youtube.com/watch?v=y8OnoxKotPQ
@@ -29,6 +38,11 @@ rows in the csv file.
 
 # Troubleshooting
 Check the logs
+
+```bash
+$ less /var/logs/queeriouslabs/acl.log
+```
+
 Restart the services
 
 ```bash
