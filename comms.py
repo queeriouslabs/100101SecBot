@@ -218,7 +218,7 @@ class Comms:
             writer.close()
             await writer.wait_closed()
 
-    async def request(self, addr, req):
+    async def request(self, addr, req, resp=True):
         """ A one-off request to a server.
 
         A user of this comms instance makes requests to other components on
@@ -250,6 +250,9 @@ class Comms:
         msg = json.dumps(req).encode('utf-8')
         writer.write(msg + b'\n')
         await writer.drain()
+        if not resp:
+            return {}
+
         self.logger.info(f"Waiting on response from {addr}")
         data = await reader.readline()
 
