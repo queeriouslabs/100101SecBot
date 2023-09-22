@@ -1,3 +1,25 @@
+'''
+broadcast.py will serve TCP clients on the network and local clients via
+a unix domain socket at /<socket root>/broadcast.sock.   Anything written to
+the unix socket will be broadcast to all TCP clients with no checking.
+
+Clients are never read and cannot impact the service, they only may
+receive infomation send by the service.
+
+to test, you can run the service as is:
+    $ python broadcast.py
+
+In another terminal, you can connect a TCP client to the interface:
+    $ telnet localhost 8080
+
+In a 3rd terminal, simulate a local device sending messages to the broadcast
+service using the broadcast_client.py:
+    $ python broacast_client.py
+
+The messages will be echoed to the TCP client throught he broadcast service.
+Any tcp client which can access the service can connect to receive broadcast
+messages.
+'''
 import asyncio
 import json
 from comms import create_comms
