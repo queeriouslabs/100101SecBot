@@ -12,9 +12,6 @@ sys.modules['RPi.GPIO'] = MagicMock()
 import pytest
 
 
-import pudb
-
-
 @pytest.mark.skip("Won't work, debugging only")
 @pytest.mark.asyncio
 @patch('authorizer.datetime')
