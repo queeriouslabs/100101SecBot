@@ -72,7 +72,7 @@ class Relay:
         self.cool.clear()  # relay is hot
         self.open.set()    # latch is open
         asyncio.create_task(
-            self.comms.request("boradcast",
+            self.comms.request("broadcast",
                                {"source_id": "front_door_latch",
                                 "event": "/front_door/open"},
                                False))
