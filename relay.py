@@ -51,13 +51,15 @@ class Relay:
         if not self.cool.is_set():
             asyncio.create_task(
                 self.comms.request("broadcast",
-                                   {"event": "/front_door/cooling"},
+                                   {"src_id": "front_door_latch",
+                                    "event": "/front_door/cooling"},
                                    False))
             await asyncio.sleep(3)  # cooldown time
             self.cool.set()         # latch is cool
             asyncio.create_task(
                 self.comms.request("broadcast",
-                                   {"event": "/front_door/ready"},
+                                   {"src_id": "front_door_latch",
+                                    "event": "/front_door/ready"},
                                    False))
 
     def relay_on(self):
@@ -71,7 +73,8 @@ class Relay:
         self.open.set()    # latch is open
         asyncio.create_task(
             self.comms.request("boradcast",
-                               {"event": "/front_door/open"},
+                               {"src_id": "front_door_latch",
+                                "event": "/front_door/open"},
                                False))
 
     def relay_off(self):
@@ -116,7 +119,9 @@ class Relay:
         '''
         self.comms.start()
         await self.comms.request("broadcast",
-                                 {"event": "/front_door/ready"},
+                                 {
+                                     "src_id": "front_door_latch",
+                                     "event": "/front_door/ready"},
                                  False)
 
         while not self.failed.is_set():
