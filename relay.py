@@ -49,17 +49,30 @@ class Relay:
     async def cooldown(self):
         ''' If the latch is hot, waits for 3s before setting it to cool '''
         if not self.cool.is_set():
+            asyncio.create_task(
+                self.comms.request("broadcast",
+                                   {"event": "/front_door/cooling"},
+                                   False))
             await asyncio.sleep(3)  # cooldown time
             self.cool.set()         # latch is cool
+            asyncio.create_task(
+                self.comms.request("broadcast",
+                                   {"event": "/front_door/ready"},
+                                   False))
 
     def relay_on(self):
         ''' handles opening the actual relay via piplates.  Sets the
         latch status to 'hot' by clearing the cool event.
         '''
+
         self.comms.logger.info("Unlocking Front Door")
         RELAY.relayON(0, 2)
         self.cool.clear()  # relay is hot
         self.open.set()    # latch is open
+        asyncio.create_task(
+            self.comms.request("boradcast",
+                               {"event": "/front_door/open"},
+                               False))
 
     def relay_off(self):
         ''' closes the relay, clearing the open event, and creating the
@@ -102,6 +115,9 @@ class Relay:
         correct permissions.
         '''
         self.comms.start()
+        await self.comms.request("broadcast",
+                                 {"event": "/front_door/ready"},
+                                 False)
 
         while not self.failed.is_set():
             req = await self.comms.in_q.get()

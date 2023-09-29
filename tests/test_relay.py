@@ -2,13 +2,13 @@ import asyncio
 import sys
 from unittest.mock import (
     patch,
-    AsyncMock,
     MagicMock
 )
 # modules used by piplate but don't function on non-rpi env
 sys.modules['spidev'] = MagicMock()
 sys.modules['RPi.GPIO'] = MagicMock()
 import pytest
+import broadcast
 import relay
 
 
@@ -40,6 +40,8 @@ async def test_init(relayOFF, relayON):
 @patch("relay.RELAY.relayON")
 @patch("relay.RELAY.relayOFF")
 async def test_open(relayOFF, relayON):
+    bcast = asyncio.create_task(broadcast.process())
+    await asyncio.sleep(.1)
     front_door = relay.Relay("front_door")
     task = asyncio.create_task(front_door.process())
 
@@ -58,6 +60,7 @@ async def test_open(relayOFF, relayON):
     task.cancel()
     front_door.comms.logger.handlers.clear()
     front_door.comms.stop()
+    bcast.cancel()
 
 
 @pytest.mark.asyncio
@@ -90,6 +93,8 @@ async def test_open_already_open(unlock_coro, relayOFF, relayON):
 @patch("relay.RELAY.relayON")
 @patch("relay.RELAY.relayOFF")
 async def test_relay_failure(relayOFF, relayON):
+    bcast = asyncio.create_task(broadcast.process())
+    await asyncio.sleep(.1)
     front_door = relay.Relay("front_door")
     task = asyncio.create_task(front_door.process())
     await asyncio.sleep(0)
@@ -108,12 +113,15 @@ async def test_relay_failure(relayOFF, relayON):
     task.cancel()
     front_door.comms.logger.handlers.clear()
     front_door.comms.stop()
+    bcast.cancel()
 
 
 @pytest.mark.asyncio
 @patch("relay.RELAY.relayON")
 @patch("relay.RELAY.relayOFF")
 async def test_relay_hot(relayOFF, relayON):
+    bcast = asyncio.create_task(broadcast.process())
+    await asyncio.sleep(.1)
     front_door = relay.Relay("front_door")
     task = asyncio.create_task(front_door.process())
     await asyncio.sleep(0)
@@ -139,3 +147,4 @@ async def test_relay_hot(relayOFF, relayON):
     task.cancel()
     front_door.comms.logger.handlers.clear()
     front_door.comms.stop()
+    bcast.cancel()

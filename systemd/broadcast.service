@@ -1,0 +1,18 @@
+[Unit]
+Description=Broadcast Service
+Before=front_door_rfid_reader.service
+After=front_door_latch.service
+
+[Service]
+Type=simple
+
+LogNamespace=keep
+WorkingDirectory=/home/marcidy/100101SecBot
+
+Environment="QUEERIOUSLABS_ENV=PROD"
+ExecStart=/home/marcidy/venv/bin/python3 /home/marcidy/100101SecBot/broadcast.py
+Restart=always
+RestartSec=1s
+
+[Install]
+WantedBy=multi-user.target

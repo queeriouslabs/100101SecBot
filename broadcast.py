@@ -64,11 +64,11 @@ async def process():
                 msg = json.dumps(data)
                 writer.write(msg.encode('utf-8') + b'\r\n')
                 await writer.drain()
+                good.append((reader, writer))
             except Exception as e:
                 comms.logger.info(e)
                 writer.close()
                 await writer.wait_closed()
-            good.append((reader, writer))
 
         clients = good  # This '''pattern''' drops disconnected cliends
 
