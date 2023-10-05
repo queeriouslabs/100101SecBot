@@ -45,7 +45,7 @@ async def process():
 
         cl = (reader, writer)
         clients.append(cl)
-        comms.logger.info("Client Connected!")
+        comms.logger.info(f"Client Connected: {len(clients)}")
         writer.write(b"Connected\r\n")
         await writer.drain()
 
@@ -57,9 +57,11 @@ async def process():
     # read from a client, they are awful, awful people with bad breath
     while True:
         data = await comms.in_q.get()
+        comms.logger.info(f"{__file__}: Got data: {data}")
         good = []
         while clients:
             reader, writer = clients.pop()
+            comms.logger.info(f"{__file__}: sending to client")
             try:
                 msg = json.dumps(data)
                 writer.write(msg.encode('utf-8') + b'\r\n')
