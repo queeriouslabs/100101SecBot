@@ -17,7 +17,7 @@ permission_schema = {
     "type": "object",
     "properties": {
         "perm": {"type": "string"},
-        "context" : {"type": "object"}
+        "context": {"type": "object"}
     },
     "required": ["perm"]
 }
@@ -46,7 +46,7 @@ response_schema = {
     "properties": {
         "source_id": {"type": "string"},
         "target_id": {"type": "string"},
-        "context" : {"type": "object"},
+        "context": {"type": "object"},
         "code": {"type": "integer"},
         "msg": {"type": "string"}
     },
@@ -63,7 +63,7 @@ grant_schema = {
         "target_id": {"type": "string"},
         "perm": permission_schema,
         "grant": {"type":  "boolean"},
-        "context" : {"type": "object"}
+        "context": {"type": "object"}
     },
     "required": ["perm", "grant"]
 }
@@ -81,17 +81,38 @@ error_schema = {
 }
 
 
+event_schema = {
+    "$id": "/schemas/event",
+
+    "type": "object",
+    "properties": {
+        "src_id": {"type": "string"},
+        "event": {"type": "string"},
+        "context": {"type": "object"}
+    },
+    "required": ["src_id", "event"]
+}
+
+
 def validate_permission(data):
     validate(data, permission_schema)
+
 
 def validate_request(data):
     validate(data, request_schema)
 
+
 def validate_grant(data):
     validate(data, grant_schema)
+
 
 def validate_response(data):
     validate(data, response_schema)
 
+
 def validate_error(data):
     validate(data, error_schema)
+
+
+def validate_event(data):
+    validate(data, event_schema)
