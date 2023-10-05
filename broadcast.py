@@ -67,6 +67,8 @@ async def process():
                 writer.write(msg.encode('utf-8') + b'\r\n')
                 await writer.drain()
                 good.append((reader, writer))
+            except ConnectionError:
+                writer.close()
             except Exception as e:
                 comms.logger.info(e)
                 writer.close()
