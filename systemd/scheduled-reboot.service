@@ -1,0 +1,6 @@
+[Unit]
+Description=Daily Reoot of access control
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/systemctl --force reboot
