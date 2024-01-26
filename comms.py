@@ -307,7 +307,7 @@ def config_logging(comms, comms_config):
         filename=comms_config.LOG_FILE,
         when="W6",
         interval=1,
-        backupCount=52,
+        backupCount=2,
         encoding=None,
         delay=False,
         utc=True,
