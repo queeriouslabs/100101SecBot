@@ -11,6 +11,7 @@ calls.
 Abstracting out the commuication allows easy replacement as needed.
 """
 import asyncio
+import datetime
 import json
 from json import JSONDecodeError
 import logging
@@ -311,7 +312,7 @@ def config_logging(comms, comms_config):
         encoding=None,
         delay=False,
         utc=True,
-        atTime=None)
+        atTime=datetime.time(0, 0))
 
     formatter = logging.Formatter(comms_config.LOG_FORMAT)
     handler.setLevel(comms_config.LOG_LEVEL)
