@@ -52,7 +52,7 @@ class RfidReader:
             self.comms.logger.error(f"No RFID reader: {label}")
             exit()
         if rfid_reader:
-            self.comms.logger.info(f"Found {label}")
+            self.comms.logger.debug(f"Found {label}")
 
         for d in devices:
             if d != rfid_reader:
@@ -84,7 +84,7 @@ class RfidReader:
 
             if ev.code != evdev.ecodes.KEY_ENTER:
                 c = evdev.categorize(ev)
-                self.comms.logger.info(
+                self.comms.logger.debug(
                     f"Appending keycode: {c.keycode}, {c.keycode[4:]}")
                 try:
                     keys.append(int(c.keycode[4:]))
@@ -94,12 +94,13 @@ class RfidReader:
                 identifier = "".join(map(str, keys))
                 try:
                     # ignores response
-                    await self.comms.request("authorizer",
-                                           make_request(self.name, identifier))
+                    await self.comms.request(
+                        "authorizer",
+                        make_request(self.name, identifier))
                 except ValueError as e:
                     self.comms.logger.error(f"Auth request failed with {e}")
                 keys = []
-                self.comms.logger.info("Read complete")
+                self.comms.logger.debug("Read complete")
 
 
 if __name__ == "__main__":

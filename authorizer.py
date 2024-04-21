@@ -37,6 +37,7 @@ class Authorizer:
 
         # Check that the requested ID is in the known RFIDs
         identity = ctx.pop('identity')
+        self.comms.logger.info(f"attempt for: {identity}")
         if identity not in self.rfids:
             return False
 
