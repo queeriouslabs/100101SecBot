@@ -13,5 +13,5 @@ class Config:
 
 class ProdConfig(Config):
     LOG_FILE = "/var/log/queeriouslabs/acl.log"
-    LOG_LEVEL = logging.ERROR
+    LOG_LEVEL = logging.INFO
     SOCKET_ROOT = "/run/queeriouslabs"
