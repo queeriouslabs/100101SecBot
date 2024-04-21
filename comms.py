@@ -178,7 +178,7 @@ class Comms:
 
             while True:
                 req = await reader.readline()
-                self.logger.info(f"{src_id} -> {req}")
+                self.logger.debug(f"{src_id} -> {req}")
                 if reader.at_eof():
                     self.logger.warning(f"Done with {src_id}")
                     reader, writer = self.clients.pop(src_id)
@@ -242,22 +242,22 @@ class Comms:
             sock_path = f"{self.socket_root}/{addr}.sock"
             reader, writer = await asyncio.open_unix_connection(sock_path)
             self.servers[addr] = (reader, writer)
-            self.logger.info(f"New connection made to {addr}")
+            self.logger.debug(f"New connection made to {addr}")
         else:
-            self.logger.info(f"Found connection: {addr}")
+            self.logger.debug(f"Found connection: {addr}")
             reader, writer = self.servers[addr]
 
-        self.logger.info(f"Sending req to {addr}")
+        self.logger.debug(f"Sending req to {addr}")
         msg = json.dumps(req).encode('utf-8')
         writer.write(msg + b'\n')
         await writer.drain()
         if not resp:
             return {}
 
-        self.logger.info(f"Waiting on response from {addr}")
+        self.logger.debug(f"Waiting on response from {addr}")
         data = await reader.readline()
 
-        self.logger.info(f"Got response from {addr}")
+        self.logger.debug(f"Got response from {addr}")
         if data == b'':
             return {}
         try:
@@ -265,7 +265,7 @@ class Comms:
         except JSONDecodeError as e:
             self.logger.error(f"{e}")
 
-        self.logger.info(f"{addr} said: {data}")
+        self.logger.debug(f"{addr} said: {data}")
 
         return data
 

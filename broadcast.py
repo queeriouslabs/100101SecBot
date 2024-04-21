@@ -57,11 +57,11 @@ async def process():
     # read from a client, they are awful, awful people with bad breath
     while True:
         data = await comms.in_q.get()
-        comms.logger.info(f"{__file__}: Got data: {data}")
+        comms.logger.debug(f"{__file__}: Got data: {data}")
         good = []
         while clients:
             reader, writer = clients.pop()
-            comms.logger.info(f"{__file__}: sending to client")
+            comms.logger.debug(f"{__file__}: sending to client")
             try:
                 msg = json.dumps(data)
                 writer.write(msg.encode('utf-8') + b'\r\n')
@@ -70,7 +70,7 @@ async def process():
             except ConnectionError:
                 writer.close()
             except Exception as e:
-                comms.logger.info(e)
+                comms.logger.debug(e)
                 writer.close()
                 await writer.wait_closed()
 
