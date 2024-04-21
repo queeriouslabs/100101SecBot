@@ -94,7 +94,7 @@ class Authorizer:
             if target_id == 'front_door_latch':
                 self.grant_permissions(grant)
 
-            self.comms.logger.info(f"sent request: {grant}")
+            self.comms.logger.debug(f"sent request: {grant}")
             await self.comms.request(target_id, grant)
 
 
