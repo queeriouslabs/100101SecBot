@@ -9,6 +9,7 @@ from unittest.mock import (
 import sys
 sys.modules['spidev'] = MagicMock()
 sys.modules['RPi.GPIO'] = MagicMock()
+import broadcast
 import pytest
 
 
@@ -72,6 +73,10 @@ async def test_access_control(dt,
 
     loop = asyncio.get_event_loop()
 
+    bcast_task = asyncio.create_task(broadcast.process())
+
+    await asyncio.sleep(.1)
+
     tasks = [asyncio.create_task(auth.process()),
              asyncio.create_task(rfid_reader.process()),
              asyncio.create_task(relay.process())]
@@ -107,3 +112,4 @@ async def test_access_control(dt,
 
     while tasks:
         tasks.pop().cancel()
+    bcast_task.cancel()
