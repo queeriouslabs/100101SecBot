@@ -85,6 +85,15 @@ class Relay:
         self.open.clear()                     # latch is closed
         asyncio.create_task(self.cooldown())  # enter cooldown
 
+    def deny(self):
+        ''' request to open was denied by authorizer, but we will broadcast
+        the event from here '''
+        self.comms.logger.info("Broadcasting relay denial")
+        asyncio.create_task(
+            self.comms.request("broadcast",
+                               {"source_id": "front_door_latch",
+                                "event": "/front_door/denied"},
+                               False))
     async def unlock(self):
         ''' Task to open the lock via the relay, then close the relay
         after a 3s delay.
@@ -118,11 +127,10 @@ class Relay:
         correct permissions.
         '''
         self.comms.start()
-        await self.comms.request("broadcast",
-                                 {
-                                     "source_id": "front_door_latch",
-                                     "event": "/front_door/ready"},
-                                 False)
+        await self.comms.request(
+            "broadcast",
+            {"source_id": "front_door_latch",
+             "event": "/front_door/ready"}, False)
 
         while not self.failed.is_set():
             req = await self.comms.in_q.get()
@@ -134,6 +142,7 @@ class Relay:
             resp['msg'] = "OK"
             await self.comms.out_q.put(resp)
             self.comms.logger.debug("sending response")
+
             # don't need to process a request if it's already opened
             if self.open.is_set():
                 continue
@@ -146,8 +155,11 @@ class Relay:
             # OK, time to check if we actually handle the permission requested
             for perm in req['permissions']:
                 # only need to handle the first grant to open door
-                if (perm['grant'] and (perm['perm'] == "/open")):
-                    asyncio.create_task(self.unlock())
+                if (perm['perm'] == "/open"):
+                    if perm['grant']:
+                        asyncio.create_task(self.unlock())
+                    else:
+                        self.deny()
                     break  # break for loop, only need first open perm
 
 

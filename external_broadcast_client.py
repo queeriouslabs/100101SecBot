@@ -50,6 +50,8 @@ async def listen():
                 print("Door Is Open")
             elif data['event'] == "/front_door/cooling":
                 print("Door is Cooling")
+            elif data['event'] == "/front_door/denied":
+                print("Access Denied!")
             else:
                 print("unknown event!")
         else:

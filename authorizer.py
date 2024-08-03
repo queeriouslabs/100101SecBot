@@ -89,13 +89,13 @@ class Authorizer:
                 self.command_handler(request)
                 continue
 
-            grant = deepcopy(request)
+            req_grant = deepcopy(request)
 
             if target_id == 'front_door_latch':
-                self.grant_permissions(grant)
+                self.grant_permissions(req_grant)
 
-            self.comms.logger.debug(f"sent request: {grant}")
-            await self.comms.request(target_id, grant)
+            self.comms.logger.debug(f"sent request: {req_grant}")
+            await self.comms.request(target_id, req_grant)
 
 
 if __name__ == "__main__":
