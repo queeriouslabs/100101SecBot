@@ -132,7 +132,6 @@ class Relay:
             {"source_id": "front_door_latch",
              "event": "/front_door/ready"}, False)
 
-        import pudb
         while not self.failed.is_set():
             req = await self.comms.in_q.get()
             self.comms.logger.debug(f"got req: {req}")
@@ -159,10 +158,9 @@ class Relay:
                 if (perm['perm'] == "/open"):
                     if perm['grant']:
                         asyncio.create_task(self.unlock())
-                        break  # break for loop, only need first open perm
                     else:
-                        asyncio.create_task(self.deny())
-                        break
+                        self.deny()
+                    break  # break for loop, only need first open perm
 
 
 if __name__ == "__main__":
