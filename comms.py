@@ -305,7 +305,7 @@ def config_logging(comms, comms_config):
     Pass in a Comm instance and a Config from settings.py.
     """
     handler = TimedRotatingFileHandler(
-        filename=comms_config.LOG_FILE,
+        filename=comms_config.LOG_ROOT + comms.name + ".log",
         when="W6",
         interval=1,
         backupCount=2,
