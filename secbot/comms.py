@@ -22,11 +22,6 @@ from signal import (
     SIGINT,
 )
 
-from settings import (
-    Config,
-    ProdConfig
-)
-
 
 class Comms:
     """ This class abstracts communication between components.

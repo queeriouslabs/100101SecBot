@@ -22,7 +22,7 @@ See broadcast.py for additional information on the broadcast service.
 import asyncio
 import os
 from secbot.comms import create_comms
-
+from settings import ExampleConfig as comms_config
 
 async def broadcast_test(comms_config):
     name = "broadcast_client"
@@ -42,11 +42,5 @@ async def broadcast_test(comms_config):
 
 
 if __name__ == "__main__":
-    config = None
-    if os.environ.get('QUEERIOUSLABS_ENV', None) == 'PROD':
-        from settings import ProdConfig as config
-    else:
-        from settings import Config as config
-
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(broadcast_test(config))
+    loop.run_until_complete(broadcast_test(comms_config))

@@ -18,12 +18,12 @@ This will run on it's own like:
     `$ python echo_client.py`
 """
 import asyncio
-from comms import create_comms
-
+from secbot.comms import create_comms
+from settings import ExampleConfig as comms_config
 
 async def test_echo():
     name = "echo_client"
-    comms = create_comms(name)
+    comms = create_comms(name, comms_config)
 
     for x in range(0, 100):
         req = {
