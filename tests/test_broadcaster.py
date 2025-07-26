@@ -2,7 +2,8 @@ import asyncio
 import json
 import pytest
 from broadcast import process
-from comms import create_comms
+from settings import Config as config
+from secbot.comms import create_comms
 
 
 async def listener(ret_q):
@@ -16,7 +17,7 @@ async def listener(ret_q):
 @pytest.mark.asyncio
 async def test_broadcast_single_client():
     # start the broadcaster process
-    bcast_task = asyncio.create_task(process())
+    bcast_task = asyncio.create_task(process(config))
 
     await asyncio.sleep(.5)
     # add a listening client
@@ -25,7 +26,7 @@ async def test_broadcast_single_client():
     await asyncio.sleep(.25)
 
     # simulate a service on the same device as broadcastor
-    comms = create_comms("test")
+    comms = create_comms("test", config)
 
     msg = "\n".join([
         "This is a story",

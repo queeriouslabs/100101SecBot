@@ -3,17 +3,18 @@ import asyncio
 import os
 from unittest.mock import patch
 import pytest
-from comms import create_comms
-import schema
+from settings import Config as config
+from secbot.comms import create_comms
+from secbot import schema
 
 
 @pytest.mark.asyncio
 async def test_comms_init():
 
     test_server_name = "test_server_name"
-    server = create_comms(test_server_name)
+    server = create_comms(test_server_name, config)
     assert server.name == test_server_name
-    assert server.socket_root == "."
+    assert server.socket_root == config.SOCKET_ROOT
     assert server.callback
     assert server.config
 
@@ -37,12 +38,12 @@ async def test_comms_init():
 @pytest.mark.asyncio
 async def test_client_server_connections():
     test_server_name = "test_server_name"
-    server = create_comms(test_server_name)
+    server = create_comms(test_server_name, config)
     server.start()
     await asyncio.sleep(0)
 
     test_client_name = "test_client_name"
-    client = create_comms(test_client_name)
+    client = create_comms(test_client_name, config)
 
     await client.connect(test_server_name)
     assert test_server_name in client.servers
@@ -73,13 +74,13 @@ async def test_client_server_communication():
             # grant['grant'] = True
 
     test_server_name = "test_server_name"
-    server = create_comms(test_server_name)
+    server = create_comms(test_server_name, config)
     server.start()
     await asyncio.sleep(0)
     asyncio.create_task(process(server))
 
     test_client_name = "test_client_name"
-    client = create_comms(test_client_name)
+    client = create_comms(test_client_name, config)
 
     perm = "/what/a/permission"
     perm_context = { "key": "value" }

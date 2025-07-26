@@ -14,6 +14,7 @@ from rfid_reader import (
     make_request,
     RfidReader,
 )
+from settings import Config as comms_config
 
 class MockEvDevice:
 
@@ -85,7 +86,7 @@ async def test_get_reader(find_ev_device):
 
     find_ev_device.return_value = mevdev
 
-    rfid = RfidReader(name, "Barcode Reader ")
+    rfid = RfidReader(name, "Barcode Reader ", comms_config)
     rfid.comms.request = AsyncMock()
 
     assert rfid.dev == mevdev
@@ -103,7 +104,7 @@ async def test_get_reader(find_ev_device):
 @patch("rfid_reader.RfidReader.find_ev_device")
 async def test_missing_dev(find_ev_device):
     name = "front_door_rfid"
-    rfid = RfidReader(name, "Barcode Reader ")
+    rfid = RfidReader(name, "Barcode Reader ", comms_config)
 
     rfid.dev = None
 
@@ -123,7 +124,7 @@ async def test_bad_key(find_ev_device):
     mevdev.stuff = string_to_ecode_list(test_ident, True)
     find_ev_device.return_value = mevdev
 
-    rfid = RfidReader(name, "Barcode Reader ")
+    rfid = RfidReader(name, "Barcode Reader ", comms_config)
     rfid.comms.request = AsyncMock()
 
     assert rfid.dev == mevdev

@@ -10,6 +10,7 @@ import sys
 sys.modules['spidev'] = MagicMock()
 sys.modules['RPi.GPIO'] = MagicMock()
 import broadcast
+from settings import Config as comms_config
 import pytest
 
 
@@ -50,8 +51,8 @@ async def test_mock_rfid_reader(dt, test_rfid_reader):
 
 
 @pytest.mark.asyncio
-@patch('relay.RELAY.relayOFF')
-@patch('relay.RELAY.relayON')
+@patch('latch.RELAY.relayOFF')
+@patch('latch.RELAY.relayON')
 @patch('authorizer.datetime')
 async def test_access_control(dt,
                               relayON,
@@ -73,7 +74,7 @@ async def test_access_control(dt,
 
     loop = asyncio.get_event_loop()
 
-    bcast_task = asyncio.create_task(broadcast.process())
+    bcast_task = asyncio.create_task(broadcast.process(comms_config))
 
     await asyncio.sleep(.1)
 
@@ -84,28 +85,35 @@ async def test_access_control(dt,
     await asyncio.sleep(.1)
     scanner.scan(all_hours_rfid)
 
+    assert relayON.call_count == 0
+    # off called during initialization
+    assert relayOFF.call_count == 1
+
     await asyncio.sleep(.1)
     assert relayON.called
     await asyncio.sleep(3.1)
     assert relayOFF.called
 
+    assert relayON.call_count == 1
+    assert relayOFF.call_count == 2
+
     scanner.scan(all_hours_rfid)
 
     await asyncio.sleep(7)
     assert relayON.call_count == 2
-    assert relayOFF.call_count == 2
+    assert relayOFF.call_count == 3
 
     # access denied, not between 11 and 22
     scanner.scan(daytime_rfid)
     await asyncio.sleep(7)
     assert relayON.call_count == 2
-    assert relayOFF.call_count == 2
+    assert relayOFF.call_count == 3
 
     dt.now = Mock(return_value=datetime(2023, 1, 2, 11, 30))
     scanner.scan(daytime_rfid)
     await asyncio.sleep(7)
     assert relayON.call_count == 3
-    assert relayOFF.call_count == 3
+    assert relayOFF.call_count == 4
 
     auth.comms.stop()
     relay.comms.stop()
