@@ -57,4 +57,6 @@ def main():
     convert_yaml_to_csv()
 
 if __name__ == '__main__':
-    main()
+    # main()
+    print("\n\nThis was already done, you probably don't want to run this\n")
+    print("And if you do, you probably need to edit the paths.\n\n")

@@ -4,3 +4,4 @@ acl.log
 old_data/
 data/
 ids.yaml
+venv/

@@ -1,0 +1,4 @@
+2025-07-26 15:15:54,033 | /home/marcidy/projects/queerious/100101SecBot/secbot/comms.py:322 | config_logging | INFO | Logging enabled 
+2025-07-26 15:15:54,033 | /home/marcidy/projects/queerious/100101SecBot/secbot/comms.py:339 | create_comms | INFO | App authorizer initialized 
+2025-07-26 15:16:12,167 | /home/marcidy/projects/queerious/100101SecBot/secbot/comms.py:118 | cleanup | WARNING | Cleaning up 
+2025-07-26 15:16:12,168 | /home/marcidy/projects/queerious/100101SecBot/secbot/comms.py:120 | cleanup | WARNING | Exiting 
