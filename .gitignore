@@ -5,3 +5,5 @@ old_data/
 data/
 ids.yaml
 venv/
+tests/logs/*
+tests/sockets/*

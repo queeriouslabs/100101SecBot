@@ -15,7 +15,8 @@ to fit the input criteria, storing key values until return is detected.
 """
 import asyncio
 import evdev
-from comms import create_comms
+import os
+from secbot.comms import create_comms
 
 
 def make_request(source_id, identifier):
@@ -34,9 +35,9 @@ def make_request(source_id, identifier):
 
 class RfidReader:
 
-    def __init__(self, name, dev_name):
+    def __init__(self, name, dev_name, comms_config):
         self.name = name
-        self.comms = create_comms(name)
+        self.comms = create_comms(name, comms_config)
         self.dev = self.find_ev_device(dev_name)
 
     def find_ev_device(self, label):
@@ -104,6 +105,12 @@ class RfidReader:
 
 
 if __name__ == "__main__":
-    front_door_reader = RfidReader("front_door_rfid", "Barcode Reader ")
+    config = None;
+    if os.environ.get('QUEERIOUSLABS_ENV', None) == 'PROD':
+        from settings import ProdConfig as config
+    else:
+        from settings import Config as config
+
+    front_door_reader = RfidReader("front_door_rfid", "Barcode Reader ", config)
     loop = asyncio.get_event_loop()
     loop.run_until_complete(front_door_reader.process())

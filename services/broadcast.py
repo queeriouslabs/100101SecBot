@@ -22,15 +22,16 @@ messages.
 '''
 import asyncio
 import json
-from comms import create_comms
+import os
+from secbot.comms import create_comms
 
 
 MAX_EXTERNAL_CLIENTS = 20  # lmao max clients
 
 
-async def process():
+async def process(comms_config):
 
-    comms = create_comms("broadcast")
+    comms = create_comms("broadcast", comms_config)
     comms.start()
 
     clients = []
@@ -78,7 +79,12 @@ async def process():
 
 
 if __name__ == "__main__":
+    config = None
+    if os.environ.get('QUEERIOUSLABS_ENV', None) == "PROD":
+        from settings import ProdConfig as config
+    else:
+        from settings import Config as config
 
     loop = asyncio.get_event_loop()
-    loop.create_task(process())
+    loop.create_task(process(config))
     loop.run_forever()
