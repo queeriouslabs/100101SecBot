@@ -7,3 +7,4 @@ ids.yaml
 venv/
 tests/logs/*
 tests/sockets/*
+*.egg-info/
