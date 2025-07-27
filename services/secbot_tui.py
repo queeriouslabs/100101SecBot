@@ -52,7 +52,7 @@ async def notify_authorizer():
     """ Sends a message to the rfid authorizer service to reload the cached
     access control list, in the event it was updated.
     """
-    if os.environ.get("QUEERIOSLABS_ENV", None) == "PROD":
+    if os.environ.get("QUEERIOUSLABS_ENV", None) == "PROD":
         from settings import ProdConfig as comms_config
     else:
         from settings import Config as comms_config
@@ -319,8 +319,8 @@ def main():
     euid = os.geteuid()
     if euid != 0:
         color_print([("yellow", "Script not started as root, running sudo")])
-        args = ['sudo', sys.executable] + sys.argv + [os.environ]
-        os.execlpe('sudo', *args)
+        args = ['sudo', "-E", sys.executable] + sys.argv
+        os.execlpe('sudo', *args, os.environ)
     print(colored(figlet_format("QueeriousLabs\nSecBot", "slant"), "magenta"))
     run()
 
