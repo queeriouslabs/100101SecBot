@@ -13,6 +13,11 @@
 ## Installation
 Clone the repo
 
+Enter the repo top directory
+```bash
+$ cd 100101SecBot
+```
+
 Create a virtualenv 
 ```bash
 $ python3 -m venv venv
@@ -26,6 +31,11 @@ $ . venv/bin/activate
 Install the requirements
 ```bash
 $ pip install -r requirements.txt
+```
+
+Install the secbot package as the repository
+```bash
+$ pip install -e .
 ```
 
 Link the systemd scripts
@@ -51,6 +61,10 @@ $ sudo systemctl enable front_door_latch.service
 $ sudo systemctl enable front_door_rfid_reader.service
 $ sudo systemctl enable scheduled-reboot.service
 $ sudo systemctl enable scheduled-reboot.timer
+```
+Create the log directory
+```bash
+$ sudo mkdir /var/log/queeriouslabs
 ```
 
 Start the front door and broadcast services
