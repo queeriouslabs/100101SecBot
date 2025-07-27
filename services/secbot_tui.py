@@ -95,7 +95,8 @@ def inquire_sponsors(rfids, cur_sponsor=None):
     """
     sponsors = set(data['sponsor'] for rfid, data in rfids.items())
     sponsors = sorted(list(sponsors))
-    sponsors.remove("unknown")
+    if "unknown" in sponsors:
+        sponsors.remove("unknown")
 
     if cur_sponsor == "unknown":
         cur_sponsor = None
