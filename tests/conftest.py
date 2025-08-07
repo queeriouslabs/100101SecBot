@@ -6,6 +6,7 @@ from unittest.mock import (
 import sys
 sys.modules['spidev'] = MagicMock()
 sys.modules['RPi.GPIO'] = MagicMock()
+sys.modules['piplates.RELAYplate'] = MagicMock()
 import time
 from evdev import (
     ecodes,
@@ -16,7 +17,8 @@ import pytest
 
 from rfid_reader import RfidReader
 from authorizer import Authorizer
-from relay import Relay
+from latch import Relay
+from settings import Config as comms_config
 
 
 class MockEvDevice:
@@ -72,7 +74,7 @@ def ev_device():
 def test_rfid_reader(find_ev_device, ev_device):
     find_ev_device.return_value = ev_device
 
-    return RfidReader("test_rfid_reader", "Barcode Reader ")
+    return RfidReader("test_rfid_reader", "Barcode Reader ", comms_config)
 
 
 @pytest.fixture
@@ -92,14 +94,16 @@ def test_authorizer(read_acl_data):
                 'sponsor': 'matt' }}
     }
     read_acl_data.return_value = test_data
-    return Authorizer()
+    return Authorizer(comms_config)
 
 
-@pytest.mark.asyncio
 @pytest.fixture
-@patch('relay.RELAY.relayOFF')
-async def test_relay(relayOFF):
-    return (Relay("front_door_latch"), relayOFF)
+@patch('latch.RELAY.relayOFF')
+def test_relay(relayOFF):
+    async def async_test_relay(relayOFF):
+        return (Relay("front_door_latch", comms_config), relayOFF)
+
+    return async_test_relay(relayOFF)
 
 
 def test_make_request():

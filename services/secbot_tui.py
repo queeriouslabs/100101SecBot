@@ -18,8 +18,8 @@ from InquirerPy.base.control import (
 )
 from InquirerPy.utils import color_print
 
-import comms
-from database import (
+from secbot import comms
+from secbot.database import (
     read_acl_data,
     write_rfid_data,
 )
@@ -52,10 +52,12 @@ async def notify_authorizer():
     """ Sends a message to the rfid authorizer service to reload the cached
     access control list, in the event it was updated.
     """
-    # FIXME:  default to producton if not set, work-around env setting.
-    if not os.environ.get('QUEERIOUSLABS_ENV'):
-        os.environ['QUEERIOUSLABS_ENV'] = 'PROD'
-    link = comms.create_comms('shell')
+    if os.environ.get("QUEERIOUSLABS_ENV", None) == "PROD":
+        from settings import ProdConfig as comms_config
+    else:
+        from settings import Config as comms_config
+
+    link = comms.create_comms('shell', comms_config)
     request = {
         'target_id': 'authorizer',
         'source_id': 'shell',
@@ -64,7 +66,13 @@ async def notify_authorizer():
             'ctx': {}
         }]}
     color_print([("magenta", "Notifying authorizer")])
-    resp = await link.request('authorizer', request)
+    try:
+        resp = await link.request('authorizer', request)
+    except FileNotFoundError as e:
+        color_print(
+            [("yellow", "Authorizer not found, perhaps not running")])
+        link.logger.handlers.clear()
+        return
     msg = ""
     if resp['msg'] == "OK":
         color = "magenta"
@@ -87,7 +95,8 @@ def inquire_sponsors(rfids, cur_sponsor=None):
     """
     sponsors = set(data['sponsor'] for rfid, data in rfids.items())
     sponsors = sorted(list(sponsors))
-    sponsors.remove("unknown")
+    if "unknown" in sponsors:
+        sponsors.remove("unknown")
 
     if cur_sponsor == "unknown":
         cur_sponsor = None
@@ -258,8 +267,12 @@ def commit_handler(rfids, hours, dirty):
             return dirty
         color_print([("magenta", "Saving changes")])
         write_rfid_data(rfids)
-        color_print([("magenta", "Done")])
-        loop = asyncio.get_event_loop()
+        color_print([("green", "Saved")])
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError as e:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
         loop.run_until_complete(notify_authorizer())
     return False
 
@@ -306,8 +319,8 @@ def main():
     euid = os.geteuid()
     if euid != 0:
         color_print([("yellow", "Script not started as root, running sudo")])
-        args = ['sudo', sys.executable] + sys.argv + [os.environ]
-        os.execlpe('sudo', *args)
+        args = ['sudo', "-E", sys.executable] + sys.argv
+        os.execlpe('sudo', *args, os.environ)
     print(colored(figlet_format("QueeriousLabs\nSecBot", "slant"), "magenta"))
     run()
 

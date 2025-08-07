@@ -25,12 +25,13 @@ Start this component from the command-line like:
 """
 import asyncio
 import json
-from comms import create_comms
+from secbot.comms import create_comms
+from settings import ExampleConfig as comms_config
 
 
 async def process():
 
-    comms = create_comms("echo")
+    comms = create_comms("echo", comms_config)
     comms.start()  # start a server which will put data into the in_q
 
     while True:

@@ -22,11 +22,6 @@ from signal import (
     SIGINT,
 )
 
-from settings import (
-    Config,
-    ProdConfig
-)
-
 
 class Comms:
     """ This class abstracts communication between components.
@@ -305,7 +300,7 @@ def config_logging(comms, comms_config):
     Pass in a Comm instance and a Config from settings.py.
     """
     handler = TimedRotatingFileHandler(
-        filename=comms_config.LOG_ROOT + comms.name + ".log",
+        filename=os.path.join(comms_config.LOG_ROOT,  comms.name + ".log"),
         when="W6",
         interval=1,
         backupCount=2,
@@ -322,7 +317,7 @@ def config_logging(comms, comms_config):
     comms.logger.info("Logging enabled")
 
 
-def create_comms(name):
+def create_comms(name, comms_config):
     """ Helper function to create a configured Comms instance.
 
     Specificy a `name` which is unique on the executing device which
@@ -334,13 +329,6 @@ def create_comms(name):
     use to address this component.
     """
     comms = Comms(name)
-    # I don't like this.   Inherent from some flask stuff.
-    # make a loader/executor which just configs the thing, or something.
-    if os.environ.get('QUEERIOUSLABS_ENV') == 'PROD':
-        comms_config = ProdConfig()
-    else:
-        comms_config = Config()
-
     comms.set_config(comms_config)
     config_logging(comms, comms_config)
     comms.logger.info(f"App {name} initialized")

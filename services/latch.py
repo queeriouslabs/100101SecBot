@@ -29,15 +29,16 @@ On initialization the relay is closed.
 """
 import asyncio
 from copy import deepcopy
+import os
 import time
 import piplates.RELAYplate as RELAY
-from comms import create_comms
+from secbot.comms import create_comms
 
 
 class Relay:
 
-    def __init__(self, name):
-        self.comms = create_comms(name)
+    def __init__(self, name, comms_config):
+        self.comms = create_comms(name, comms_config)
         self.comms.logger.info(f"Starting {name}")
         self.failed = asyncio.Event()
         self.open = asyncio.Event()
@@ -164,7 +165,12 @@ class Relay:
 
 
 if __name__ == "__main__":
-    front_door = Relay("front_door_latch")
+    config = None
+    if os.environ.get("QUEERIOUSLABS_ENV", None) == "PROD":
+        from settings import ProdConfig as config
+    else:
+        from settings import Config as config
+    front_door = Relay("front_door_latch", config)
     loop = asyncio.get_event_loop()
     loop.run_until_complete(front_door.process())
     RELAY.relayOFF(0, 2)  # uhh...just in case an error occurred

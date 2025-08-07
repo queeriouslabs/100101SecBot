@@ -1,15 +1,16 @@
+import os
 import asyncio
 from copy import deepcopy
 from datetime import datetime
-from comms import create_comms
-from database import read_acl_data
+from secbot.comms import create_comms
+from secbot.database import read_acl_data
 
 
 class Authorizer:
 
-    def __init__(self):
+    def __init__(self, config):
         self.name = "authorizer"
-        self.comms = create_comms(self.name)
+        self.comms = create_comms(self.name, config)
         self.hours = None
         self.rfids = None
         self.authorities = ['/open']
@@ -99,7 +100,13 @@ class Authorizer:
 
 
 if __name__ == "__main__":
-    auth = Authorizer()
+    config = None;
+    if os.environ.get('QUEERIOUSLABS_ENV', None) == 'PROD':
+        from settings import ProdConfig as config
+    else:
+        from settings import Config as config
+
+    auth = Authorizer(config)
     loop = asyncio.get_event_loop()
     loop.create_task(auth.process())
     loop.run_forever()

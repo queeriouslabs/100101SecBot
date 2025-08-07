@@ -11,7 +11,7 @@ WorkingDirectory=/home/marcidy/100101SecBot
 RuntimeDirectory=queeriouslabs
 RuntimeDirectoryPreserve=yes
 Environment="QUEERIOUSLABS_ENV=PROD"
-ExecStart=/home/marcidy/venv/bin/python3 /home/marcidy/100101SecBot/relay.py
+ExecStart=/home/marcidy/100101SecBot/venv/bin/python3 /home/marcidy/100101SecBot/services/latch.py
 Restart=always
 RestartSec=1s
 

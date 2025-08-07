@@ -20,12 +20,13 @@ This will run on it's own like:
 See broadcast.py for additional information on the broadcast service.
 """
 import asyncio
-from comms import create_comms
+import os
+from secbot.comms import create_comms
+from settings import ExampleConfig as comms_config
 
-
-async def broadcast_test():
+async def broadcast_test(comms_config):
     name = "broadcast_client"
-    comms = create_comms(name)
+    comms = create_comms(name, comms_config)
 
     for x in range(0, 100):
         req = {
@@ -42,4 +43,4 @@ async def broadcast_test():
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(broadcast_test())
+    loop.run_until_complete(broadcast_test(comms_config))

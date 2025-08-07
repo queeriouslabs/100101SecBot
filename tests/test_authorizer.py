@@ -7,6 +7,7 @@ from unittest.mock import (
     patch,
 )
 import pytest
+from settings import Config as comms_config
 from authorizer import (
     Authorizer,
 )
@@ -26,7 +27,7 @@ def test_authorizer_init(read_data):
     }
     read_data.return_value = test_data
 
-    authy = Authorizer()
+    authy = Authorizer(comms_config)
 
     assert authy.hours == test_data['hours']
     assert authy.rfids == test_data['rfids']
@@ -54,7 +55,7 @@ def test_authorizer_lookup(read_data, dt):
     }
     read_data.return_value = test_data
 
-    authy = Authorizer()
+    authy = Authorizer(comms_config)
 
     permission = "/open"
     ctx_1 = {'identity' : rfid1}
@@ -142,7 +143,7 @@ def test_authorizer_grant_permissions(read_data, dt):
             "perm": permission,
             "ctx": ctx_3 }]}
 
-    authy = Authorizer()
+    authy = Authorizer(comms_config)
 
     dt.now = Mock(return_value=datetime(2023, 1, 2, 9, 30))
     authy.grant_permissions(req_1)
@@ -204,7 +205,7 @@ async def test_authorizer_process(read_data, dt):
     exp_1['permissions'][0]['grant'] = True
     exp_1['permissions'][0]['ctx'] ={}
 
-    authy = Authorizer()
+    authy = Authorizer(comms_config)
     authy.comms.request = AsyncMock()
 
     dt.now = Mock(return_value=datetime(2023, 1, 2, 9, 30))
@@ -250,7 +251,7 @@ async def test_authorizer_reload(read_data):
                 'access_times': 'daytime',
                 'sponsor': 'matt' }}
     }
-    authy = Authorizer()
+    authy = Authorizer(comms_config)
 
     assert authy.hours == base_data['hours']
     assert authy.rfids == base_data['rfids']

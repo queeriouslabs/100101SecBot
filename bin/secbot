@@ -10,5 +10,5 @@ popd () {
 
 pushd /home/marcidy/100101SecBot
 echo "Loading..."
-/home/marcidy/venv/bin/python /home/marcidy/100101SecBot/secbot
+QUEERIOUSLABS_ENV="PROD" /home/marcidy/100101SecBot/venv/bin/python /home/marcidy/100101SecBot/services/secbot_tui.py
 popd
