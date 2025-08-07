@@ -1,4 +1,5 @@
 import asyncio
+import getpass
 import os
 
 from secbot.comms import create_comms
@@ -16,7 +17,7 @@ async def cli_unlock(config, req):
     name = "cli_unlock"
     comms = create_comms(name, config)
 
-    user = os.getlogin()
+    user = getpass.getuser()
     comms.logger.info(f"cli unlock by {user}")
 
     target_id = req["target_id"]
