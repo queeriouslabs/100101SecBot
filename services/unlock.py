@@ -1,6 +1,7 @@
 import asyncio
 import getpass
 import os
+import sys
 
 from secbot.comms import create_comms
 
@@ -24,7 +25,7 @@ async def cli_unlock(config, req):
     await comms.request(target_id, req)
 
 
-if __name__ == "__main__":
+def main():
     config = None
     if os.environ.get("QUEERIOUSLABS_ENV", None) == 'PROD':
         from settings import ProdConfig as config
@@ -33,3 +34,13 @@ if __name__ == "__main__":
 
     loop = asyncio.get_event_loop()
     loop.run_until_complete(cli_unlock(config, request))
+
+def elevate_privs():
+    euid = os.geteuid()
+    if euid != 0:
+        args = ['sudo', "-E", sys.executable] + sys.argv
+        os.execlpe('sudo', *args, os.environ)
+    main()
+
+if __name__ == "__main__":
+    elevate_privs()
