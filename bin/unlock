@@ -1,0 +1,14 @@
+#!/bin/bash
+
+pushd () {
+    command pushd "$@" > /dev/null
+}
+
+popd () {
+    command popd "$@" > /dev/null
+}
+
+pushd /home/marcidy/100101SecBot
+echo "Attempting unlock"
+QUEERIOUSLABS_ENV="PROD" /home/marcidy/100101SecBot/venv/bin/python /home/marcidy/100101SecBot/services/unlock.py
+popd
