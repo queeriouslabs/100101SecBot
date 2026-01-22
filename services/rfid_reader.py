@@ -35,10 +35,10 @@ def make_request(source_id, identifier):
 
 class RfidReader:
 
-    def __init__(self, name, dev_name, comms_config):
+    def __init__(self, name, dev_labels, comms_config):
         self.name = name
         self.comms = create_comms(name, comms_config)
-        self.dev = self.find_ev_device(dev_name)
+        self.dev = self.find_ev_device(dev_labels)
 
     def find_ev_device(self, labels):
         """ Queries devices for one with the name `label` and returns an
@@ -50,10 +50,11 @@ class RfidReader:
         try:
             rfid_reader = [d for d in devices if d.name in labels][0]
         except IndexError:
-            self.comms.logger.error(f"No RFID reader: {label}")
+            labs = ", ".join(labels)
+            self.comms.logger.error(f"No RFID reader found: {labs}")
             exit()
         if rfid_reader:
-            self.comms.logger.debug(f"Found {label}")
+            self.comms.logger.info(f"Found {rfid_reader.name}")
 
         for d in devices:
             if d != rfid_reader:
