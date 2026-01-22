@@ -40,7 +40,7 @@ class RfidReader:
         self.comms = create_comms(name, comms_config)
         self.dev = self.find_ev_device(dev_name)
 
-    def find_ev_device(self, label):
+    def find_ev_device(self, labels):
         """ Queries devices for one with the name `label` and returns an
         evdev.InputDevice, if found.
 
@@ -48,7 +48,7 @@ class RfidReader:
         """
         devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
         try:
-            rfid_reader = [d for d in devices if d.name == label][0]
+            rfid_reader = [d for d in devices if d.name in labels][0]
         except IndexError:
             self.comms.logger.error(f"No RFID reader: {label}")
             exit()
@@ -110,7 +110,7 @@ if __name__ == "__main__":
         from settings import ProdConfig as config
     else:
         from settings import Config as config
-
-    front_door_reader = RfidReader("front_door_rfid", "Barcode Reader ", config)
+    labels = ["Barcode Reader ", "HID 13ba:0018"]
+    front_door_reader = RfidReader("front_door_rfid", labels, config)
     loop = asyncio.get_event_loop()
     loop.run_until_complete(front_door_reader.process())
