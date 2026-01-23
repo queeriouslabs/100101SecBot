@@ -9,14 +9,14 @@ from unittest.mock import (
 import sys
 sys.modules['spidev'] = MagicMock()
 sys.modules['RPi.GPIO'] = MagicMock()
-import broadcast
-from settings import Config as comms_config
+from services import broadcast
+from services.settings import Config as comms_config
 import pytest
 
 
 @pytest.mark.skip("Won't work, debugging only")
 @pytest.mark.asyncio
-@patch('authorizer.datetime')
+@patch('services.authorizer.datetime')
 async def test_mock_ev_device(dt, ev_device):
     scanner = ev_device
 
@@ -34,7 +34,7 @@ async def test_mock_ev_device(dt, ev_device):
 
 @pytest.mark.skip("Won't work, debugging only")
 @pytest.mark.asyncio
-@patch('authorizer.datetime')
+@patch('services.authorizer.datetime')
 async def test_mock_rfid_reader(dt, test_rfid_reader):
     scanner = test_rfid_reader.dev
 
@@ -51,9 +51,9 @@ async def test_mock_rfid_reader(dt, test_rfid_reader):
 
 
 @pytest.mark.asyncio
-@patch('latch.RELAY.relayOFF')
-@patch('latch.RELAY.relayON')
-@patch('authorizer.datetime')
+@patch('services.latch.RELAY.relayOFF')
+@patch('services.latch.RELAY.relayON')
+@patch('services.authorizer.datetime')
 async def test_access_control(dt,
                               relayON,
                               relayOFF,

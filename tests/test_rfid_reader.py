@@ -10,11 +10,11 @@ from evdev import (
     KeyEvent,
     ecodes
 )
-from rfid_reader import (
+from services.rfid_reader import (
     make_request,
     RfidReader,
 )
-from settings import Config as comms_config
+from services.settings import Config as comms_config
 
 class MockEvDevice:
 
@@ -76,7 +76,7 @@ async def test_async_for():
 
 
 @pytest.mark.asyncio
-@patch("rfid_reader.RfidReader.find_ev_device")
+@patch("services.rfid_reader.RfidReader.find_ev_device")
 async def test_get_reader(find_ev_device):
     name = "front_door_rfid"
     test_string = "1234567890"
@@ -86,7 +86,7 @@ async def test_get_reader(find_ev_device):
 
     find_ev_device.return_value = mevdev
 
-    rfid = RfidReader(name, "Barcode Reader ", comms_config)
+    rfid = RfidReader(name, ["Barcode Reader ",], comms_config)
     rfid.comms.request = AsyncMock()
 
     assert rfid.dev == mevdev
@@ -101,10 +101,10 @@ async def test_get_reader(find_ev_device):
 
 
 @pytest.mark.asyncio
-@patch("rfid_reader.RfidReader.find_ev_device")
+@patch("services.rfid_reader.RfidReader.find_ev_device")
 async def test_missing_dev(find_ev_device):
     name = "front_door_rfid"
-    rfid = RfidReader(name, "Barcode Reader ", comms_config)
+    rfid = RfidReader(name, ["Barcode Reader ", ], comms_config)
 
     rfid.dev = None
 
@@ -113,7 +113,7 @@ async def test_missing_dev(find_ev_device):
 
 
 @pytest.mark.asyncio
-@patch("rfid_reader.RfidReader.find_ev_device")
+@patch("services.rfid_reader.RfidReader.find_ev_device")
 async def test_bad_key(find_ev_device):
     name = "test_name"
     test_ident = "012345A6789"
@@ -124,7 +124,7 @@ async def test_bad_key(find_ev_device):
     mevdev.stuff = string_to_ecode_list(test_ident, True)
     find_ev_device.return_value = mevdev
 
-    rfid = RfidReader(name, "Barcode Reader ", comms_config)
+    rfid = RfidReader(name, ["Barcode Reader ", ], comms_config)
     rfid.comms.request = AsyncMock()
 
     assert rfid.dev == mevdev

@@ -8,14 +8,16 @@ from unittest.mock import (
 sys.modules['spidev'] = MagicMock()
 sys.modules['RPi.GPIO'] = MagicMock()
 import pytest
-import broadcast
-import latch
-from settings import Config as comms_config
+from services import (
+    broadcast,
+    latch,
+)
+from services.settings import Config as comms_config
 
 
 @pytest.mark.asyncio
-@patch("latch.RELAY.relayON")
-@patch("latch.RELAY.relayOFF")
+@patch("services.latch.RELAY.relayON")
+@patch("services.latch.RELAY.relayOFF")
 async def test_init(relayOFF, relayON):
     ''' Initialization of the relay modules means that the
     relay is not failed, it is not open, and it is cool.
@@ -38,8 +40,8 @@ async def test_init(relayOFF, relayON):
 
 
 @pytest.mark.asyncio
-@patch("latch.RELAY.relayON")
-@patch("latch.RELAY.relayOFF")
+@patch("services.latch.RELAY.relayON")
+@patch("services.latch.RELAY.relayOFF")
 async def test_open(relayOFF, relayON):
     bcast = asyncio.create_task(broadcast.process(comms_config))
     await asyncio.sleep(.1)
@@ -65,9 +67,9 @@ async def test_open(relayOFF, relayON):
 
 
 @pytest.mark.asyncio
-@patch("latch.RELAY.relayON")
-@patch("latch.RELAY.relayOFF")
-@patch("latch.Relay.unlock")
+@patch("services.latch.RELAY.relayON")
+@patch("services.latch.RELAY.relayOFF")
+@patch("services.latch.Relay.unlock")
 async def test_open_already_open(unlock_coro, relayOFF, relayON):
     front_door = latch.Relay("front_door", comms_config)
     task = asyncio.create_task(front_door.process())
@@ -91,8 +93,8 @@ async def test_open_already_open(unlock_coro, relayOFF, relayON):
 
 
 @pytest.mark.asyncio
-@patch("latch.RELAY.relayON")
-@patch("latch.RELAY.relayOFF")
+@patch("services.latch.RELAY.relayON")
+@patch("services.latch.RELAY.relayOFF")
 async def test_relay_failure(relayOFF, relayON):
     bcast = asyncio.create_task(broadcast.process(comms_config))
     await asyncio.sleep(.1)
@@ -118,8 +120,8 @@ async def test_relay_failure(relayOFF, relayON):
 
 
 @pytest.mark.asyncio
-@patch("latch.RELAY.relayON")
-@patch("latch.RELAY.relayOFF")
+@patch("services.latch.RELAY.relayON")
+@patch("services.latch.RELAY.relayOFF")
 async def test_relay_hot(relayOFF, relayON):
     bcast = asyncio.create_task(broadcast.process(comms_config))
     await asyncio.sleep(.1)
