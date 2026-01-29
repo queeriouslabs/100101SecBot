@@ -1,8 +1,8 @@
 import asyncio
 import json
 import pytest
-from broadcast import process
-from settings import Config as config
+from services.broadcast import process
+from services.settings import Config as config
 from secbot.comms import create_comms
 
 

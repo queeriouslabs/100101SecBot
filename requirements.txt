@@ -7,7 +7,7 @@ pyyaml
 jsonschema
 referencing
 coverage
-pytest
+pytest<=6.2.5
 pytest-cov
 pytest-pudb
 pytest-asyncio

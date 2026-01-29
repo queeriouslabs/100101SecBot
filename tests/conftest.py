@@ -15,10 +15,10 @@ from evdev import (
 )
 import pytest
 
-from rfid_reader import RfidReader
-from authorizer import Authorizer
-from latch import Relay
-from settings import Config as comms_config
+from services.rfid_reader import RfidReader
+from services.authorizer import Authorizer
+from services.latch import Relay
+from services.settings import Config as comms_config
 
 
 class MockEvDevice:
@@ -70,7 +70,7 @@ def ev_device():
 
 
 @pytest.fixture
-@patch('rfid_reader.RfidReader.find_ev_device')
+@patch('services.rfid_reader.RfidReader.find_ev_device')
 def test_rfid_reader(find_ev_device, ev_device):
     find_ev_device.return_value = ev_device
 
@@ -78,7 +78,7 @@ def test_rfid_reader(find_ev_device, ev_device):
 
 
 @pytest.fixture
-@patch('authorizer.read_acl_data')
+@patch('services.authorizer.read_acl_data')
 def test_authorizer(read_acl_data):
     test_data = {
         'hours': {
@@ -98,7 +98,7 @@ def test_authorizer(read_acl_data):
 
 
 @pytest.fixture
-@patch('latch.RELAY.relayOFF')
+@patch('services.latch.RELAY.relayOFF')
 def test_relay(relayOFF):
     async def async_test_relay(relayOFF):
         return (Relay("front_door_latch", comms_config), relayOFF)

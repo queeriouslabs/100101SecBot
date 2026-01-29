@@ -3,7 +3,7 @@ import asyncio
 import os
 from unittest.mock import patch
 import pytest
-from settings import Config as config
+from services.settings import Config as config
 from secbot.comms import create_comms
 from secbot import schema
 
