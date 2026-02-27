@@ -111,7 +111,8 @@ if __name__ == "__main__":
         from settings import ProdConfig as config
     else:
         from settings import Config as config
-    labels = ["Barcode Reader ", "HID 13ba:0018"]
+
+    labels = ["Barcode Reader ", "HID 13ba:0018", "HID 413d:2107"]
     front_door_reader = RfidReader("front_door_rfid", labels, config)
     loop = asyncio.get_event_loop()
     loop.run_until_complete(front_door_reader.process())
