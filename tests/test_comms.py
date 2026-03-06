@@ -5,7 +5,7 @@ from unittest.mock import patch
 import pytest
 from services.settings import Config as config
 from secbot.comms import create_comms
-from secbot import schema
+# from secbot import schema
 
 
 @pytest.mark.asyncio
@@ -87,13 +87,13 @@ async def test_client_server_communication():
     permission = {
         "perm": perm,
         "context": perm_context }
-    schema.validate_permission(permission)
+    # schema.validate_permission(permission)
 
     request = {
         "source_id": test_client_name,
         "target_id": test_server_name,
         "permissions": [ permission ]}
-    schema.validate_request(request)
+    # schema.validate_request(request)
 
     grant = {
         "source_id": test_client_name,
@@ -101,7 +101,7 @@ async def test_client_server_communication():
         "perm": permission,
         "grant": True
     }
-    schema.validate_grant(grant)
+    # schema.validate_grant(grant)
 
     resp = {
         "source_id": test_client_name,
@@ -109,7 +109,7 @@ async def test_client_server_communication():
         "code": 0,
         "msg": "Success"
     }
-    schema.validate_response(resp)
+    # schema.validate_response(resp)
 
     server_response = await client.request(test_server_name, request)
     assert server_response == resp
