@@ -7,6 +7,12 @@ These schema are not the protocol used by the comms module, all messages
 passed in that protocol are validated by these schema.
 
 See the documentation for jsonschema to understand the syntax.
+
+nb(matt):
+    These are not used.  jsonschema is a reference,
+    but as it install rust for some dumb reason, and that
+    takes forever, I removed this functionality even as
+    the passed messages do conform to this schema.
 """
 from jsonschema import validate
 

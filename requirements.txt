@@ -4,8 +4,6 @@ spidev
 RPi.GPIO
 evdev
 pyyaml
-jsonschema
-referencing
 coverage
 pytest<=6.2.5
 pytest-cov
