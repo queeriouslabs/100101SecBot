@@ -1,5 +1,5 @@
 [Unit]
-Description=Daily Reoot of access control
+Description=Weekly Reoot of access control
 
 [Service]
 Type=simple

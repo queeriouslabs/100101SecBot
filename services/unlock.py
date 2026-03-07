@@ -32,7 +32,7 @@ def main():
     else:
         from settings import Config as config
 
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
     loop.run_until_complete(cli_unlock(config, request))
 
 def elevate_privs():
