@@ -4,9 +4,7 @@ from unittest.mock import (
     MagicMock,
 )
 import sys
-sys.modules['spidev'] = MagicMock()
-sys.modules['RPi.GPIO'] = MagicMock()
-sys.modules['piplates.RELAYplate'] = MagicMock()
+sys.modules['gpiozero'] = MagicMock()
 import time
 from evdev import (
     ecodes,

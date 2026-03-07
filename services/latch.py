@@ -31,9 +31,10 @@ import asyncio
 from copy import deepcopy
 import os
 import time
-import piplates.RELAYplate as RELAY
+from gpiozero import LED
 from secbot.comms import create_comms
 
+RELAY = LED(23)
 
 class Relay:
 
@@ -45,7 +46,7 @@ class Relay:
         self.cool = asyncio.Event()
         self.failed.clear()
         self.cool.set()
-        RELAY.relayOFF(0, 2)
+        RELAY.off()
 
     async def cooldown(self):
         ''' If the latch is hot, waits for 3s before setting it to cool '''
@@ -69,7 +70,7 @@ class Relay:
         '''
 
         self.comms.logger.info("Unlocking Front Door")
-        RELAY.relayON(0, 2)
+        RELAY.on()
         self.cool.clear()  # relay is hot
         self.open.set()    # latch is open
         asyncio.create_task(
@@ -82,7 +83,7 @@ class Relay:
         ''' closes the relay, clearing the open event, and creating the
         cooldown task '''
         self.comms.logger.info("Locking Front Door")
-        RELAY.relayOFF(0, 2)
+        RELAY.off()
         self.open.clear()                     # latch is closed
         asyncio.create_task(self.cooldown())  # enter cooldown
 
@@ -173,4 +174,4 @@ if __name__ == "__main__":
     front_door = Relay("front_door_latch", config)
     loop = asyncio.get_event_loop()
     loop.run_until_complete(front_door.process())
-    RELAY.relayOFF(0, 2)  # uhh...just in case an error occurred
+    RELAY.off()  # uhh...just in case an error occurred

@@ -1,7 +1,4 @@
 six
-pi-plates
-spidev
-RPi.GPIO
 evdev
 pyyaml
 coverage
@@ -12,3 +9,4 @@ pytest-asyncio
 pyfiglet
 termcolor
 InquirerPy
+gpiozero
